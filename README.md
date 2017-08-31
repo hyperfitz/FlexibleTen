@@ -4,8 +4,7 @@
 ###
 ### Between you and me for now please; I am not done with it.
 
-# FlexibleTen
-# A calculator for flexible ten mathematics 
+# FlexibleTen 
 Flexible Ten Mathematics:
 
 Flexible Ten Mathematics is a mathematical hypothesis that states that the behavior of all quantities in math is logically 
