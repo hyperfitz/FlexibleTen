@@ -6,7 +6,11 @@
 
 # FlexibleTen
 # A calculator for flexible ten mathematics 
-The Hypothesis of Flexible Ten Mathematics:
+Flexible Ten Mathematics:
+
+Flexible Ten Mathematics is a mathematical hypothesis that states that the behavior of all quantities in math is logically 
+identical regardless of any quantity’s total magnitude, and that all apparent differences in logical behavior are 
+denotational, artifactual and non-quantitative.
 
 There is great emphasis placed on “the powers of ten” in education and public awareness of mathematics. 
 The behavior of this specific quantity is often viewed as having almost magical properties  due to its special 
