@@ -1,15 +1,12 @@
 ### Alright buddy, I already know how I am going to say this better, but this is the crux of it; a very incomplete
 ### draft, but enough for you to see the implications. A basic calculator that, for starters, could do addition, 
-### subtraction, multipication and division using this logic would be FUCKING awesome. ;-)
+### subtraction, multipication and division using altered number lines would be FUCKING awesome. ;-)
 ###
 ### Between you and me for now please; I am not done with it.
 
-# FlexibleTen 
-Flexible Ten Mathematics:
+# Flexible Ten Mathematics
 
-Flexible Ten Mathematics is a mathematical hypothesis that states that the behavior of all quantities in math is logically 
-identical regardless of any quantity’s total magnitude, and that all apparent differences in logical behavior are 
-denotational, artifactual and non-quantitative.
+Flexible Ten Mathematics states that all quantities behave the same in basic mathematical logic through mathematical functions, which means that the apparent special behavior of the quantity commonly defined as ten is not rooted, mathematically, in operational logic, and that, therefore, any number can be made to behave as ten, in a quantitatively accurate way, simply by making notational changes. 
 
 There is great emphasis placed on “the powers of ten” in education and public awareness of mathematics. 
 The behavior of this specific quantity is often viewed as having almost magical properties  due to its special 
