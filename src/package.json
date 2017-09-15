@@ -1,0 +1,12 @@
+{
+  "name": "react-ts-z8wrf6",
+  "description": "",
+  "homepage": "https://stackblitz.com/edit/react-ts-z8wrf6",
+  "dependencies": {
+    "react": "15.6.1",
+    "react-dom": "15.6.1",
+    "@types/react": "16.0.0",
+    "@types/react-dom": "15.5.1"
+  },
+  "version": "1.0.0"
+}
