@@ -26,4 +26,9 @@ export interface FlexibleNumber {
    * Just like `wholeDigits`, but to the right of the decimal place.
    */
   fractionDigits: Array<number>;
+
+  /**
+   * If true, this is a negative number
+   */
+  negative?: boolean;
 }
