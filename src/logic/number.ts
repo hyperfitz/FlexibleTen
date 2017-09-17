@@ -42,5 +42,6 @@ export function newNumber(numberBase: number): FlexibleNumber {
     fractionDigits: [],
     wholeDigits: [],
     numberBase: numberBase,
+    negative: false,
   };
 }

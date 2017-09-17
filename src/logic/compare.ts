@@ -32,16 +32,24 @@ export function compareNumbers(num1: FlexibleNumber, num2: FlexibleNumber): numb
   // order of magnitude and going downward.
   digits1.reverse();
   digits2.reverse();
+  let cmp = 0;
   digits1.forEach((digit1, i) => {
+    if (cmp != 0) {
+      return;
+    }
     const digit2 = digits2[i];
-    let cmp = 0;
+    // console.log("digits: 1=" + digit1 + ", 2=" + digit2);
     if (digit1 > digit2) {
-      return 1 * modifier;
+      // console.log("GT");
+      cmp = 1 * modifier;
+      return;
     } else if (digit2 > digit1) {
-      return -1 * modifier;
+      // console.log("LT");
+      cmp =  -1 * modifier;
+      return;
     }
   });
-  return 0;
+  return cmp;
 }
 
 // function compareDigitSets

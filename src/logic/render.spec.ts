@@ -23,6 +23,11 @@ describe("Number parsing", () => {
     expect(render.parseNumber("1234.1234", 10)).to.deep.equal(expected);
   });
 
+  it("should parse 0 as a number with no digits", () => {
+    const expected = newNumber(10);
+    expect(render.parseNumber("0", 10)).to.deep.equal(expected);
+  });
+
   // TODO: test for negative number parsing
 });
 
@@ -56,6 +61,11 @@ describe("Number rendering", () => {
     num.wholeDigits = [4, 3, 2, 1];
     num.fractionDigits = [1, 2, 3, 4];
     expect(render.renderNumber(num)).to.equal("1234.1234");
+  });
+
+  it("should format 0 in base 10", () => {
+    const num = newNumber(10);
+    expect(render.renderNumber(num)).to.equal("0");
   });
 
   // TODO: test for negative number formatting

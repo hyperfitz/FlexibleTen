@@ -44,6 +44,10 @@ export function renderNumber(number: FlexibleNumber): string {
 
 /** Parses a number string representation into a `FlexibleNumber` */
 export function parseNumber(numberStr: string, numberBase: number): FlexibleNumber {
+  const negative = numberStr.indexOf("-") == 0;
+  if (negative) {
+    numberStr = numberStr.substring(1);
+  }
   const num = newNumber(numberBase);
   const decimal = numberStr.indexOf(".");
   if (decimal == -1) {
@@ -57,6 +61,7 @@ export function parseNumber(numberStr: string, numberBase: number): FlexibleNumb
   num.wholeDigits.reverse();
   trimZeroPadding(num.wholeDigits);
   trimZeroPadding(num.fractionDigits);
+  num.negative = negative;  
   return num;
 }
 
