@@ -8,7 +8,7 @@ export interface CalcButtonProps {
 export class CalcButton extends React.Component<CalcButtonProps> {
 
   handleClick() {
-    console.log("click! - " + this.props.id);
+    // console.log("click! - " + this.props.id);
     if (this.props.onClick) {
       this.props.onClick(this.props.id);
     }

@@ -60,7 +60,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 1);
+/******/ 	return __webpack_require__(__webpack_require__.s = 2);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -73,66 +73,61 @@ module.exports = React;
 /* 1 */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(2);
-__webpack_require__(11);
-module.exports = __webpack_require__(12);
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+function addDigitSet(numberBase, num1, num2, index, carry, result) {
+    if (index === void 0) { index = 0; }
+    if (carry === void 0) { carry = 0; }
+    if (result == null) {
+        result = [];
+    }
+    if (index >= num1.length && index >= num2.length) {
+        if (carry > 0) {
+            result.push(carry);
+        }
+        return result;
+    }
+    var digit1 = index < num1.length ? num1[index] : 0;
+    var digit2 = index < num2.length ? num2[index] : 0;
+    // console.log("add: a=" + digit1 + ", b=" + digit2);
+    var sum = digit1 + digit2 + carry;
+    var resultDigit = sum % numberBase;
+    result.push(resultDigit);
+    carry = Math.floor(sum / numberBase);
+    addDigitSet(numberBase, num1, num2, index + 1, carry, result);
+    return result;
+}
+exports.addDigitSet = addDigitSet;
 
 
 /***/ }),
 /* 2 */
 /***/ (function(module, exports, __webpack_require__) {
 
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var React = __webpack_require__(0);
-var ReactDOM = __webpack_require__(3);
-var App_1 = __webpack_require__(4);
-ReactDOM.render(React.createElement(App_1.App, null), document.getElementById("example"));
+__webpack_require__(3);
+__webpack_require__(13);
+module.exports = __webpack_require__(14);
 
 
 /***/ }),
 /* 3 */
-/***/ (function(module, exports) {
-
-module.exports = ReactDOM;
-
-/***/ }),
-/* 4 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
 Object.defineProperty(exports, "__esModule", { value: true });
 var React = __webpack_require__(0);
-var CalcPage_1 = __webpack_require__(5);
-// 'HelloProps' describes the shape of props.
-// State is never set so we use the 'undefined' type.
-var App = (function (_super) {
-    __extends(App, _super);
-    function App() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    App.prototype.componentWillMount = function () {
-    };
-    App.prototype.render = function () {
-        return React.createElement("div", { className: "cl-mcont" },
-            React.createElement(CalcPage_1.CalcPage, null));
-    };
-    return App;
-}(React.Component));
-exports.App = App;
+var ReactDOM = __webpack_require__(4);
+var App_1 = __webpack_require__(5);
+ReactDOM.render(React.createElement(App_1.App, null), document.getElementById("example"));
 
+
+/***/ }),
+/* 4 */
+/***/ (function(module, exports) {
+
+module.exports = ReactDOM;
 
 /***/ }),
 /* 5 */
@@ -152,7 +147,44 @@ var __extends = (this && this.__extends) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 var React = __webpack_require__(0);
-var Calculator_1 = __webpack_require__(6);
+var CalcPage_1 = __webpack_require__(6);
+// 'HelloProps' describes the shape of props.
+// State is never set so we use the 'undefined' type.
+var App = (function (_super) {
+    __extends(App, _super);
+    function App() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    App.prototype.componentWillMount = function () {
+    };
+    App.prototype.render = function () {
+        return React.createElement("div", { className: "cl-mcont" },
+            React.createElement(CalcPage_1.CalcPage, null));
+    };
+    return App;
+}(React.Component));
+exports.App = App;
+
+
+/***/ }),
+/* 6 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+var React = __webpack_require__(0);
+var Calculator_1 = __webpack_require__(7);
 var CalcPage = (function (_super) {
     __extends(CalcPage, _super);
     function CalcPage() {
@@ -177,7 +209,7 @@ exports.CalcPage = CalcPage;
 
 
 /***/ }),
-/* 6 */
+/* 7 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -194,23 +226,87 @@ var __extends = (this && this.__extends) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 var React = __webpack_require__(0);
-var CalcButton_1 = __webpack_require__(7);
-var NumberDisplay_1 = __webpack_require__(8);
-var convert = __webpack_require__(10);
+var CalcButton_1 = __webpack_require__(8);
+var NumberDisplay_1 = __webpack_require__(9);
+var convert = __webpack_require__(11);
+var operations = __webpack_require__(12);
 var Calculator = (function (_super) {
     __extends(Calculator, _super);
     function Calculator() {
         return _super !== null && _super.apply(this, arguments) || this;
     }
+    Calculator.prototype.updateRegisterA = function (num) {
+        var numb = convert.convertNumber(num, this.state.displayRegisterB.numberBase);
+        this.setState({
+            displayRegisterA: num,
+            displayRegisterB: numb,
+        });
+    };
+    Calculator.prototype.onClear = function () {
+        this.setState({
+            fraction: false,
+            operationPending: false,
+            operation: "",
+        });
+        var reg = this.state.displayRegisterA;
+        reg.fractionDigits = [];
+        reg.wholeDigits = [];
+        reg.negative = false;
+        this.updateRegisterA(reg);
+    };
     Calculator.prototype.handleNumberEntry = function (id) {
-        console.log("calc click - " + id);
+        // console.log("calc click - " + id);
+        if (this.state.operationPending) {
+            var operationRegister = JSON.parse(JSON.stringify(this.state.displayRegisterA));
+            this.state.displayRegisterA.fractionDigits = [];
+            this.state.displayRegisterA.wholeDigits = [];
+            this.state.displayRegisterA.negative = false;
+            this.setState({
+                operationRegister: operationRegister,
+                operationPending: false,
+            });
+        }
         var num = parseInt(id);
         var reg = this.state.displayRegisterA;
-        reg.wholeDigits.unshift(num);
-        var regb = convert.convertNumber(reg, this.state.displayRegisterB.numberBase);
+        if (this.state.fraction) {
+            reg.fractionDigits.push(num);
+        }
+        else {
+            reg.wholeDigits.unshift(num);
+        }
+        this.updateRegisterA(reg);
+    };
+    Calculator.prototype.handleOperation = function () {
+        if (!this.state.operation) {
+            return;
+        }
+        if (this.state.operation == "+") {
+            var newNumber = operations.addNumbers(this.state.operationRegister, this.state.displayRegisterA);
+            this.setState({
+                operationRegister: null,
+            });
+            this.updateRegisterA(newNumber);
+        }
+        if (this.state.operation == "-") {
+            console.log("subtraction!");
+        }
+        if (this.state.operation == "*") {
+            console.log("multiplication!");
+        }
+        if (this.state.operation == "/") {
+            console.log("division!");
+        }
+        this.setState({ operation: null });
+    };
+    Calculator.prototype.handleOperationClick = function (operation) {
         this.setState({
-            displayRegisterA: reg,
-            displayRegisterB: regb,
+            operationPending: true,
+            operation: operation,
+        });
+    };
+    Calculator.prototype.handleDecimalClick = function () {
+        this.setState({
+            fraction: true
         });
     };
     Calculator.prototype.componentWillMount = function () {
@@ -247,30 +343,30 @@ var Calculator = (function (_super) {
                         React.createElement("strong", null, this.state.displayRegisterB.numberBase)),
                     React.createElement(NumberDisplay_1.NumberDisplay, { num: this.state.displayRegisterB }))),
             React.createElement("div", { className: "row" },
-                React.createElement(CalcButton_1.CalcButton, null, "C"),
+                React.createElement(CalcButton_1.CalcButton, { onClick: this.onClear.bind(this) }, "C"),
                 React.createElement(CalcButton_1.CalcButton, null, "()"),
-                React.createElement(CalcButton_1.CalcButton, null, "%"),
-                React.createElement(CalcButton_1.CalcButton, null, "/")),
+                React.createElement(CalcButton_1.CalcButton, { id: "%", onClick: this.handleOperationClick.bind(this) }, "%"),
+                React.createElement(CalcButton_1.CalcButton, { id: "/", onClick: this.handleOperationClick.bind(this) }, "/")),
             React.createElement("div", { className: "row" },
                 React.createElement(CalcButton_1.CalcButton, { id: "7", onClick: this.handleNumberEntry.bind(this) }, "7"),
                 React.createElement(CalcButton_1.CalcButton, { id: "8", onClick: this.handleNumberEntry.bind(this) }, "8"),
                 React.createElement(CalcButton_1.CalcButton, { id: "9", onClick: this.handleNumberEntry.bind(this) }, "9"),
-                React.createElement(CalcButton_1.CalcButton, null, "*")),
+                React.createElement(CalcButton_1.CalcButton, { id: "*", onClick: this.handleOperationClick.bind(this) }, "*")),
             React.createElement("div", { className: "row" },
                 React.createElement(CalcButton_1.CalcButton, { id: "4", onClick: this.handleNumberEntry.bind(this) }, "4"),
                 React.createElement(CalcButton_1.CalcButton, { id: "5", onClick: this.handleNumberEntry.bind(this) }, "5"),
                 React.createElement(CalcButton_1.CalcButton, { id: "6", onClick: this.handleNumberEntry.bind(this) }, "6"),
-                React.createElement(CalcButton_1.CalcButton, null, "-")),
+                React.createElement(CalcButton_1.CalcButton, { id: "-", onClick: this.handleOperationClick.bind(this) }, "-")),
             React.createElement("div", { className: "row" },
                 React.createElement(CalcButton_1.CalcButton, { id: "1", onClick: this.handleNumberEntry.bind(this) }, "1"),
                 React.createElement(CalcButton_1.CalcButton, { id: "2", onClick: this.handleNumberEntry.bind(this) }, "2"),
                 React.createElement(CalcButton_1.CalcButton, { id: "3", onClick: this.handleNumberEntry.bind(this) }, "3"),
-                React.createElement(CalcButton_1.CalcButton, null, "+")),
+                React.createElement(CalcButton_1.CalcButton, { id: "+", onClick: this.handleOperationClick.bind(this) }, "+")),
             React.createElement("div", { className: "row" },
                 React.createElement(CalcButton_1.CalcButton, null, "\u00B1"),
                 React.createElement(CalcButton_1.CalcButton, { id: "0", onClick: this.handleNumberEntry.bind(this) }, "0"),
-                React.createElement(CalcButton_1.CalcButton, null, "."),
-                React.createElement(CalcButton_1.CalcButton, null, "=")));
+                React.createElement(CalcButton_1.CalcButton, { onClick: this.handleDecimalClick.bind(this) }, "."),
+                React.createElement(CalcButton_1.CalcButton, { onClick: this.handleOperation.bind(this) }, "=")));
     };
     return Calculator;
 }(React.Component));
@@ -278,7 +374,7 @@ exports.Calculator = Calculator;
 
 
 /***/ }),
-/* 7 */
+/* 8 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -301,7 +397,7 @@ var CalcButton = (function (_super) {
         return _super !== null && _super.apply(this, arguments) || this;
     }
     CalcButton.prototype.handleClick = function () {
-        console.log("click! - " + this.props.id);
+        // console.log("click! - " + this.props.id);
         if (this.props.onClick) {
             this.props.onClick(this.props.id);
         }
@@ -316,7 +412,7 @@ exports.CalcButton = CalcButton;
 
 
 /***/ }),
-/* 8 */
+/* 9 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -333,7 +429,7 @@ var __extends = (this && this.__extends) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 var React = __webpack_require__(0);
-var render = __webpack_require__(9);
+var render = __webpack_require__(10);
 var NumberDisplay = (function (_super) {
     __extends(NumberDisplay, _super);
     function NumberDisplay() {
@@ -350,7 +446,7 @@ exports.NumberDisplay = NumberDisplay;
 
 
 /***/ }),
-/* 9 */
+/* 10 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -388,13 +484,14 @@ exports.renderNumber = renderNumber;
 
 
 /***/ }),
-/* 10 */
+/* 11 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var MaxDecimalPlaces = 10;
+var util_1 = __webpack_require__(1);
+var MaxDecimalPlaces = 30;
 function convertNumber(num, toBase) {
     var result = {
         wholeDigits: [],
@@ -448,30 +545,8 @@ function getDigitSetValue(digits, numberBase) {
 function convertDigitSet(digits, srcBase, destBase) {
     var result = convertDigit(digits[0], destBase);
     for (var i = 1; i < digits.length; i++) {
-        result = addDigitSet(destBase, result, convertDigit(digits[i] * Math.pow(srcBase, i), destBase));
+        result = util_1.addDigitSet(destBase, result, convertDigit(digits[i] * Math.pow(srcBase, i), destBase));
     }
-    return result;
-}
-function addDigitSet(numberBase, num1, num2, index, carry, result) {
-    if (index === void 0) { index = 0; }
-    if (carry === void 0) { carry = 0; }
-    if (result == null) {
-        result = [];
-    }
-    if (index >= num1.length && index >= num2.length) {
-        if (carry > 0) {
-            result.push(carry);
-        }
-        return result;
-    }
-    var digit1 = index < num1.length ? num1[index] : 0;
-    var digit2 = index < num2.length ? num2[index] : 0;
-    // console.log("add: a=" + digit1 + ", b=" + digit2);
-    var sum = digit1 + digit2 + carry;
-    var resultDigit = sum % numberBase;
-    result.push(resultDigit);
-    carry = Math.floor(sum / numberBase);
-    addDigitSet(numberBase, num1, num2, index + 1, carry, result);
     return result;
 }
 function convertDigit(src, toBase, result) {
@@ -491,17 +566,58 @@ function convertDigit(src, toBase, result) {
 
 
 /***/ }),
-/* 11 */
+/* 12 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var util_1 = __webpack_require__(1);
+/**
+ * Adds two numbers together
+ *
+ * // TODO: support negative numbers
+ */
+function addNumbers(num1, num2) {
+    // temporarily remove the decimal place to make addition easier
+    var digits1 = num1.wholeDigits;
+    var fraction1 = JSON.parse(JSON.stringify(num1.fractionDigits));
+    var digits2 = num2.wholeDigits;
+    var fraction2 = JSON.parse(JSON.stringify(num2.fractionDigits));
+    while (fraction1.length > fraction2.length) {
+        fraction2.push(0);
+    }
+    while (fraction2.length > fraction1.length) {
+        fraction1.push(0);
+    }
+    fraction1.reverse();
+    fraction2.reverse();
+    digits1 = fraction1.concat(digits1);
+    digits2 = fraction2.concat(digits2);
+    var digits3 = util_1.addDigitSet(num1.numberBase, digits1, digits2);
+    var fraction3 = digits3.splice(0, fraction1.length);
+    return {
+        wholeDigits: digits3,
+        fractionDigits: fraction3,
+        numberBase: num1.numberBase,
+        negative: false // TODO: figure this out...
+    };
+}
+exports.addNumbers = addNumbers;
+
+
+/***/ }),
+/* 13 */
 /***/ (function(module, exports) {
 
 // removed by extract-text-webpack-plugin
 
 /***/ }),
-/* 12 */
+/* 14 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = __webpack_require__.p + "img/logo.png";
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=bundle-db436b.js.map
+//# sourceMappingURL=bundle-666c06.js.map

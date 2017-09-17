@@ -96,7 +96,7 @@ describe("Number conversion", () => {
   it("should convert 0.2 (base 10) to 0.0011001100 (base 2)", () => {
     const base10 = flex([], [2], 10);
     const base2 = convert.convertNumber(base10, 2);
-    expect(render.renderNumber(base2)).to.equal("0.00110011");
+    expect(render.renderNumber(base2)).to.equal("0.0011001100110011001100110011");
   });
 
   it("should convert 2.5 (base 10) to 10.1 (base 2)", () => {
