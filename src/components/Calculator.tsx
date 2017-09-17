@@ -88,6 +88,7 @@ export class Calculator extends React.Component<undefined, CalculatorState> {
     this.setState({
       operationPending: true,
       operation: operation,
+      fraction: false,
     });
   }
 

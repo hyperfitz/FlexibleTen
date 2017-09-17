@@ -1,6 +1,6 @@
 import {expect} from "chai";
 
-import {FlexibleNumber} from "./number";
+import {FlexibleNumber, newNumber} from "./number";
 import * as convert from "./convert";
 import * as render from "./render";
 

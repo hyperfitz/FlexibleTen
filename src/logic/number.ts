@@ -32,3 +32,15 @@ export interface FlexibleNumber {
    */
   negative?: boolean;
 }
+
+/**
+ * Convenience function for creating a new empty number
+ * with the specified number base.
+ */
+export function newNumber(numberBase: number): FlexibleNumber {
+  return {
+    fractionDigits: [],
+    wholeDigits: [],
+    numberBase: numberBase,
+  };
+}

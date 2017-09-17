@@ -1,6 +1,18 @@
-import {FlexibleNumber} from "./number";
+import {FlexibleNumber, newNumber} from "./number";
+import {trimZeroPadding} from "./util";
 
 const digits = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ#!";
+
+function buildReverseDigits(): {[key: string]: number} {
+  const result = {};
+  for (let i = 0; i < digits.length; i++) {
+    const c = digits[i];
+    result[c] = i;
+  }
+  return result;
+}
+
+const reverseDigits = buildReverseDigits();
 
 /** Converts a digit into its rendered form */
 export function renderDigit(digit: number): string {
@@ -28,4 +40,32 @@ export function renderNumber(number: FlexibleNumber): string {
     });
   }
   return arr.join("");
+}
+
+/** Parses a number string representation into a `FlexibleNumber` */
+export function parseNumber(numberStr: string, numberBase: number): FlexibleNumber {
+  const num = newNumber(numberBase);
+  const decimal = numberStr.indexOf(".");
+  if (decimal == -1) {
+    num.wholeDigits = parseDigits(numberStr);
+  } else {
+    const parts = numberStr.split(".");
+    num.wholeDigits = parseDigits(parts[0]);
+    num.fractionDigits = parseDigits(parts[1]);
+  }
+  // re-order so that least significant digit comes first
+  num.wholeDigits.reverse();
+  trimZeroPadding(num.wholeDigits);
+  trimZeroPadding(num.fractionDigits);
+  return num;
+}
+
+/** Parses a series of digits from string form into array form */
+function parseDigits(digitStr: string): Array<number> {
+  const digits: Array<number> = [];
+  for (let i = 0; i < digitStr.length; i++) {
+    const c = digitStr[i];
+    digits.push(reverseDigits[c]);
+  }
+  return digits;
 }

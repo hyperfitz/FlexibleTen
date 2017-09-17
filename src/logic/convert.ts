@@ -1,5 +1,5 @@
 import {FlexibleNumber} from "./number";
-import {addDigitSet} from "./util";
+import {addDigitSet, trimZeroPadding} from "./util";
 
 const MaxDecimalPlaces = 30;
 
@@ -22,13 +22,7 @@ export function convertNumber(num: FlexibleNumber, toBase: number): FlexibleNumb
   return result;
 }
 
-function trimZeroPadding(digitSet: Array<number>) {
-  let i = digitSet.length;
-  while (digitSet[i - 1] == 0) {
-    i--;
-  }
-  digitSet.splice(i, digitSet.length - i);
-}
+
 
 function longDivision(numerator: number, denominator: number, numberBase: number, result?: Array<number>): Array<number> {
   if (result == null) {
