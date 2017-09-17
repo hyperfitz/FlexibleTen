@@ -110,4 +110,12 @@ describe("Number comparison", () => {
   it("-0.123 > -0.1234", () => {
     expect(compareNumbers("-0.123", "-0.1234")).to.equal(1);
   });
+
+  it("123 > -123", () => {
+    expect(compareNumbers("123", "-123")).to.equal(1);
+  });
+
+  it("-123 < 123", () => {
+    expect(compareNumbers("-123", "123")).to.equal(-1);
+  });
 });
