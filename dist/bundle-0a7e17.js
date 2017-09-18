@@ -60,7 +60,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 2);
+/******/ 	return __webpack_require__(__webpack_require__.s = 4);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -76,13 +76,25 @@ module.exports = React;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+var numbertables_1 = __webpack_require__(3);
+/**
+ * Adds two digit sets together recursively
+ *
+ * The least significant digits are added,
+ * then the next up, and so on with any overflow carrying to the
+ * next order of magnitude.
+ */
 function addDigitSet(numberBase, num1, num2, index, carry, result) {
     if (index === void 0) { index = 0; }
     if (carry === void 0) { carry = 0; }
+    // result is created on the first iteration
     if (result == null) {
         result = [];
     }
+    // Once the index has advanced beyond the end of both numbers, the add operation is over
     if (index >= num1.length && index >= num2.length) {
+        // if carry is set, make sure to append the last number
+        // (so that 50 + 50 = 100 and not 00)
         if (carry > 0) {
             result.push(carry);
         }
@@ -90,24 +102,115 @@ function addDigitSet(numberBase, num1, num2, index, carry, result) {
     }
     var digit1 = index < num1.length ? num1[index] : 0;
     var digit2 = index < num2.length ? num2[index] : 0;
-    // console.log("add: a=" + digit1 + ", b=" + digit2);
-    var sum = digit1 + digit2 + carry;
-    var resultDigit = sum % numberBase;
-    result.push(resultDigit);
-    carry = Math.floor(sum / numberBase);
+    // First add the two numbers, then add the carry
+    var sum = numbertables_1.lookupAddition(digit1, digit2, numberBase);
+    var sum2 = numbertables_1.lookupAddition(sum.result, carry, numberBase);
+    result.push(sum2.result);
+    carry = sum.carry + sum2.carry;
+    // carry = Math.floor(sum / numberBase);
     addDigitSet(numberBase, num1, num2, index + 1, carry, result);
     return result;
 }
 exports.addDigitSet = addDigitSet;
+/**
+ * Trims the padded zeros from a digit set.
+ *
+ * For whole number digit sets, trims the left padded zeros.
+ *
+ * `00987` -> `987`
+ *
+ * Since fractional digits are ordered in reverse, the same
+ * logic will trim right padded zeros.
+ *
+ * `0.0098700` -> `0.00987`
+ */
+function trimZeroPadding(digitSet) {
+    var i = digitSet.length;
+    while (digitSet[i - 1] == 0) {
+        i--;
+    }
+    digitSet.splice(i, digitSet.length - i);
+}
+exports.trimZeroPadding = trimZeroPadding;
+/**
+ * Adds any additional zero padding to make sure that both digit
+ * sets are the same length.
+ *
+ * Whole digits example: If the numbers `12345` and `987` are aligned, the result will be
+ * `12345` and `00987`
+ *
+ * Fractional digits example: If the numbers `0.12345` and `0.987` are aligned, the
+ * result will be `0.12345` and `0.98700`
+ */
+function addZeroPadding(digitSet1, digitSet2) {
+    while (digitSet1.length < digitSet2.length) {
+        digitSet1.push(0);
+    }
+    while (digitSet2.length < digitSet1.length) {
+        digitSet2.push(0);
+    }
+}
+exports.addZeroPadding = addZeroPadding;
+/** Creates a deep copy of the specified object */
+function deepCopy(obj) {
+    return JSON.parse(JSON.stringify(obj));
+}
+exports.deepCopy = deepCopy;
+/**
+ * Converts a `FlexibleNumber` object into a digit set
+ *
+ * The result will be ordered least significant digits
+ * to most significant.
+ */
+function convertToDigitSet(num) {
+    var fraction = deepCopy(num.fractionDigits);
+    fraction.reverse();
+    return fraction.concat(num.wholeDigits);
+}
+exports.convertToDigitSet = convertToDigitSet;
+/**
+ * Converts a digit set into a `FlexibleNumber` object
+ *
+ * @param digits Digit set to convert. This includes both whole and fractional digits.
+ * @param decimalPlace This is the number of fractional digits.
+ * @param numberBase Base of the flexible number.
+ */
+function convertFromDigitSet(digits, decimalPlace, numberBase, negative) {
+    var wholeDigits = deepCopy(digits);
+    var fractionDigits = wholeDigits.splice(0, decimalPlace);
+    fractionDigits.reverse();
+    trimZeroPadding(wholeDigits);
+    trimZeroPadding(fractionDigits);
+    return {
+        wholeDigits: wholeDigits,
+        fractionDigits: fractionDigits,
+        numberBase: numberBase,
+        negative: negative,
+    };
+}
+exports.convertFromDigitSet = convertFromDigitSet;
 
 
 /***/ }),
 /* 2 */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(3);
-__webpack_require__(13);
-module.exports = __webpack_require__(14);
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+/**
+ * Convenience function for creating a new empty number
+ * with the specified number base.
+ */
+function newNumber(numberBase) {
+    return {
+        fractionDigits: [],
+        wholeDigits: [],
+        numberBase: numberBase,
+        negative: false,
+    };
+}
+exports.newNumber = newNumber;
 
 
 /***/ }),
@@ -117,20 +220,92 @@ module.exports = __webpack_require__(14);
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var React = __webpack_require__(0);
-var ReactDOM = __webpack_require__(4);
-var App_1 = __webpack_require__(5);
-ReactDOM.render(React.createElement(App_1.App, null), document.getElementById("example"));
+var maxBase = 64;
+function generateNumberTables(operation) {
+    // For each base, create a two-dimensional array
+    // of left operand -> right operand -> result, carry
+    //
+    // Base
+    // - left operand
+    // - - right operand
+    // - - - result, carry
+    var tables = {};
+    for (var base = 2; base <= maxBase; base++) {
+        tables[base] = [];
+        for (var num1 = 0; num1 <= base; num1++) {
+            tables[base].push([]);
+            for (var num2 = 0; num2 <= base; num2++) {
+                tables[base][num1].push(operation(num1, num2, base));
+            }
+        }
+    }
+    return tables;
+}
+function generateAdditionTables() {
+    return generateNumberTables(function (num1, num2, base) {
+        var result = (num1 + num2) % base;
+        var carry = Math.floor((num1 + num2) / base);
+        return {
+            result: result,
+            carry: carry,
+        };
+    });
+}
+var AdditionTables = generateAdditionTables();
+function generateSubtractionTables() {
+    return generateNumberTables(function (num1, num2, base) {
+        var result = num1 - num2;
+        var carry = result < 0 ? 1 : 0;
+        if (carry) {
+            result = result + base;
+        }
+        return {
+            result: result,
+            carry: carry,
+        };
+    });
+}
+var SubtractionTables = generateSubtractionTables();
+function lookupAddition(num1, num2, base) {
+    return AdditionTables[base][num1][num2];
+}
+exports.lookupAddition = lookupAddition;
+function lookupSubtraction(num1, num2, base) {
+    return SubtractionTables[base][num1][num2];
+}
+exports.lookupSubtraction = lookupSubtraction;
 
 
 /***/ }),
 /* 4 */
+/***/ (function(module, exports, __webpack_require__) {
+
+__webpack_require__(5);
+__webpack_require__(16);
+module.exports = __webpack_require__(17);
+
+
+/***/ }),
+/* 5 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var React = __webpack_require__(0);
+var ReactDOM = __webpack_require__(6);
+var App_1 = __webpack_require__(7);
+ReactDOM.render(React.createElement(App_1.App, null), document.getElementById("example"));
+
+
+/***/ }),
+/* 6 */
 /***/ (function(module, exports) {
 
 module.exports = ReactDOM;
 
 /***/ }),
-/* 5 */
+/* 7 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -147,7 +322,7 @@ var __extends = (this && this.__extends) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 var React = __webpack_require__(0);
-var CalcPage_1 = __webpack_require__(6);
+var CalcPage_1 = __webpack_require__(8);
 // 'HelloProps' describes the shape of props.
 // State is never set so we use the 'undefined' type.
 var App = (function (_super) {
@@ -167,7 +342,7 @@ exports.App = App;
 
 
 /***/ }),
-/* 6 */
+/* 8 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -184,7 +359,7 @@ var __extends = (this && this.__extends) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 var React = __webpack_require__(0);
-var Calculator_1 = __webpack_require__(7);
+var Calculator_1 = __webpack_require__(9);
 var CalcPage = (function (_super) {
     __extends(CalcPage, _super);
     function CalcPage() {
@@ -209,7 +384,7 @@ exports.CalcPage = CalcPage;
 
 
 /***/ }),
-/* 7 */
+/* 9 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -226,10 +401,10 @@ var __extends = (this && this.__extends) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 var React = __webpack_require__(0);
-var CalcButton_1 = __webpack_require__(8);
-var NumberDisplay_1 = __webpack_require__(9);
-var convert = __webpack_require__(11);
-var operations = __webpack_require__(12);
+var CalcButton_1 = __webpack_require__(10);
+var NumberDisplay_1 = __webpack_require__(11);
+var convert = __webpack_require__(13);
+var operations = __webpack_require__(14);
 var Calculator = (function (_super) {
     __extends(Calculator, _super);
     function Calculator() {
@@ -280,28 +455,32 @@ var Calculator = (function (_super) {
         if (!this.state.operation) {
             return;
         }
+        var newNumber;
         if (this.state.operation == "+") {
-            var newNumber = operations.addNumbers(this.state.operationRegister, this.state.displayRegisterA);
-            this.setState({
-                operationRegister: null,
-            });
-            this.updateRegisterA(newNumber);
+            newNumber = operations.addNumbers(this.state.operationRegister, this.state.displayRegisterA);
         }
         if (this.state.operation == "-") {
-            console.log("subtraction!");
+            newNumber = operations.subtractNumbers(this.state.operationRegister, this.state.displayRegisterA);
         }
         if (this.state.operation == "*") {
             console.log("multiplication!");
+            return;
         }
         if (this.state.operation == "/") {
             console.log("division!");
+            return;
         }
-        this.setState({ operation: null });
+        this.setState({
+            operationRegister: null,
+            operation: null,
+        });
+        this.updateRegisterA(newNumber);
     };
     Calculator.prototype.handleOperationClick = function (operation) {
         this.setState({
             operationPending: true,
             operation: operation,
+            fraction: false,
         });
     };
     Calculator.prototype.handleDecimalClick = function () {
@@ -374,7 +553,7 @@ exports.Calculator = Calculator;
 
 
 /***/ }),
-/* 8 */
+/* 10 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -412,7 +591,7 @@ exports.CalcButton = CalcButton;
 
 
 /***/ }),
-/* 9 */
+/* 11 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -429,7 +608,7 @@ var __extends = (this && this.__extends) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 var React = __webpack_require__(0);
-var render = __webpack_require__(10);
+var render = __webpack_require__(12);
 var NumberDisplay = (function (_super) {
     __extends(NumberDisplay, _super);
     function NumberDisplay() {
@@ -446,13 +625,24 @@ exports.NumberDisplay = NumberDisplay;
 
 
 /***/ }),
-/* 10 */
+/* 12 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+var number_1 = __webpack_require__(2);
+var util_1 = __webpack_require__(1);
 var digits = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ#!";
+function buildReverseDigits() {
+    var result = {};
+    for (var i = 0; i < digits.length; i++) {
+        var c = digits[i];
+        result[c] = i;
+    }
+    return result;
+}
+var reverseDigits = buildReverseDigits();
 /** Converts a digit into its rendered form */
 function renderDigit(digit) {
     return digits[digit];
@@ -471,6 +661,9 @@ function renderNumber(number) {
     else {
         arr.push("0");
     }
+    if (number.negative) {
+        arr.push("-");
+    }
     arr.reverse();
     if (number.fractionDigits.length) {
         arr.push(".");
@@ -481,10 +674,43 @@ function renderNumber(number) {
     return arr.join("");
 }
 exports.renderNumber = renderNumber;
+/** Parses a number string representation into a `FlexibleNumber` */
+function parseNumber(numberStr, numberBase) {
+    var negative = numberStr.indexOf("-") == 0;
+    if (negative) {
+        numberStr = numberStr.substring(1);
+    }
+    var num = number_1.newNumber(numberBase);
+    var decimal = numberStr.indexOf(".");
+    if (decimal == -1) {
+        num.wholeDigits = parseDigits(numberStr);
+    }
+    else {
+        var parts = numberStr.split(".");
+        num.wholeDigits = parseDigits(parts[0]);
+        num.fractionDigits = parseDigits(parts[1]);
+    }
+    // re-order so that least significant digit comes first
+    num.wholeDigits.reverse();
+    util_1.trimZeroPadding(num.wholeDigits);
+    util_1.trimZeroPadding(num.fractionDigits);
+    num.negative = negative;
+    return num;
+}
+exports.parseNumber = parseNumber;
+/** Parses a series of digits from string form into array form */
+function parseDigits(digitStr) {
+    var digits = [];
+    for (var i = 0; i < digitStr.length; i++) {
+        var c = digitStr[i];
+        digits.push(reverseDigits[c]);
+    }
+    return digits;
+}
 
 
 /***/ }),
-/* 11 */
+/* 13 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -506,18 +732,11 @@ function convertNumber(num, toBase) {
         var fractionDenominator = Math.pow(num.numberBase, num.fractionDigits.length);
         // Multiply numerator by number base to skip the initial 0 to the left of the decimal point
         result.fractionDigits = longDivision(fractionNumerator * toBase, fractionDenominator, toBase);
-        trimZeroPadding(result.fractionDigits);
+        util_1.trimZeroPadding(result.fractionDigits);
     }
     return result;
 }
 exports.convertNumber = convertNumber;
-function trimZeroPadding(digitSet) {
-    var i = digitSet.length;
-    while (digitSet[i - 1] == 0) {
-        i--;
-    }
-    digitSet.splice(i, digitSet.length - i);
-}
 function longDivision(numerator, denominator, numberBase, result) {
     if (result == null) {
         result = [];
@@ -566,7 +785,112 @@ function convertDigit(src, toBase, result) {
 
 
 /***/ }),
-/* 12 */
+/* 14 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var util_1 = __webpack_require__(1);
+var number_1 = __webpack_require__(2);
+var compare_1 = __webpack_require__(15);
+var numbertables_1 = __webpack_require__(3);
+/**
+ * Adds two numbers together
+ *
+ * // TODO: support negative numbers
+ */
+function addNumbers(num1, num2) {
+    // TODO: support negative numbers
+    num1 = util_1.deepCopy(num1);
+    num2 = util_1.deepCopy(num2);
+    util_1.addZeroPadding(num1.wholeDigits, num2.wholeDigits);
+    util_1.addZeroPadding(num1.fractionDigits, num2.fractionDigits);
+    // Should result be negative?
+    var negative = false;
+    // Should we subtract instead of add? (for combining negative with positive numbers)
+    var subtract = false;
+    if (num1.negative && num2.negative) {
+        negative = true;
+    }
+    if (num1.negative != num2.negative) {
+        subtract = true;
+    }
+    // console.log("num1=" + num1.wholeDigits + ", num2=" + num2.wholeDigits + ", neg=" + negative + ", sub=" + subtract);
+    var digits3;
+    if (subtract) {
+        // determine if the negative number is bigger in magnitude than the
+        // positive number. Convert the negative to the positive and subtract
+        // the smaller magnitude number from the larger magnitude number.
+        var _a = num1.negative ? [num1, num2] : [num2, num1], nNum = _a[0], pNum = _a[1];
+        nNum.negative = false;
+        var nDigits = util_1.convertToDigitSet(nNum);
+        var pDigits = util_1.convertToDigitSet(pNum);
+        switch (compare_1.compareNumbers(nNum, pNum)) {
+            case 0:
+                // a positive number added to a negative number of the
+                // same magnitude equals zero
+                return number_1.newNumber(num1.numberBase);
+            case 1:
+                negative = true;
+                digits3 = subtractDigitSet(num1.numberBase, nDigits, pDigits);
+                break;
+            default:
+                digits3 = subtractDigitSet(num1.numberBase, pDigits, nDigits);
+                break;
+        }
+    }
+    else {
+        var digits1 = util_1.convertToDigitSet(num1);
+        var digits2 = util_1.convertToDigitSet(num2);
+        digits3 = util_1.addDigitSet(num1.numberBase, digits1, digits2);
+    }
+    var result = util_1.convertFromDigitSet(digits3, num1.fractionDigits.length, num1.numberBase);
+    result.negative = negative;
+    return result;
+}
+exports.addNumbers = addNumbers;
+/** Subtracts `num1` from `num2` */
+function subtractNumbers(num1, num2) {
+    num2 = util_1.deepCopy(num2);
+    // subtracting a number is the same as adding a negative number
+    num2.negative = !num2.negative;
+    return addNumbers(num1, num2);
+}
+exports.subtractNumbers = subtractNumbers;
+function subtractDigitSet(numberBase, num1, num2) {
+    var diffs = [];
+    num1.forEach(function (digit1, index) {
+        var digit2 = num2[index];
+        var diff = numbertables_1.lookupSubtraction(digit1, digit2, numberBase);
+        // if (!diff) {
+        //   console.error("missing: 1=" + digit1 + ", 2=" + digit2 + ", base=" + numberBase);
+        //   console.log(num1);
+        //   console.log(num2);
+        // }
+        diffs.push(diff);
+    });
+    // DEBUG
+    // const diffArr = diffs.map(diff => diff.result + ":" + diff.carry);
+    // console.log("diffs=" + diffArr.join(","));
+    // END DEBUG
+    var result = [];
+    var carry = 0;
+    diffs.forEach(function (diff) {
+        // subtract carry
+        var diff2 = numbertables_1.lookupSubtraction(diff.result, carry, numberBase);
+        // console.log("digit=" + diff.result + ", carry=" + carry + ", resultDigit=" + diff2.result + ", resultCarry=" + diff2.carry);
+        var resultDigit = diff2.result;
+        result.push(resultDigit);
+        carry = diff.carry + diff2.carry;
+    });
+    // restore original ordering of digits
+    return result;
+}
+
+
+/***/ }),
+/* 15 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -574,50 +898,70 @@ function convertDigit(src, toBase, result) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var util_1 = __webpack_require__(1);
 /**
- * Adds two numbers together
+ * Compares two numbers.
  *
- * // TODO: support negative numbers
+ * - returns 0 if `num1` and `num2` are equal
+ * - returns 1 if `num1` is greater than `num2`
+ * - returns -1 if `num1` is less than `num2`
  */
-function addNumbers(num1, num2) {
-    // temporarily remove the decimal place to make addition easier
-    var digits1 = num1.wholeDigits;
-    var fraction1 = JSON.parse(JSON.stringify(num1.fractionDigits));
-    var digits2 = num2.wholeDigits;
-    var fraction2 = JSON.parse(JSON.stringify(num2.fractionDigits));
-    while (fraction1.length > fraction2.length) {
-        fraction2.push(0);
+function compareNumbers(num1, num2) {
+    // shortcuts based on sign
+    if (num1.negative != num2.negative) {
+        // if num2 is negative and num1 is positive, num1 is greater
+        if (num2.negative) {
+            return 1;
+        }
+        // if num1 is negative and num2 is positive, num1 is less
+        return -1;
     }
-    while (fraction2.length > fraction1.length) {
-        fraction1.push(0);
-    }
-    fraction1.reverse();
-    fraction2.reverse();
-    digits1 = fraction1.concat(digits1);
-    digits2 = fraction2.concat(digits2);
-    var digits3 = util_1.addDigitSet(num1.numberBase, digits1, digits2);
-    var fraction3 = digits3.splice(0, fraction1.length);
-    return {
-        wholeDigits: digits3,
-        fractionDigits: fraction3,
-        numberBase: num1.numberBase,
-        negative: false // TODO: figure this out...
-    };
+    // invert the result if both numbers are negative
+    // a larger negative is less than a smaller negative
+    var modifier = num1.negative ? -1 : 1;
+    util_1.addZeroPadding(num1.fractionDigits, num2.fractionDigits);
+    util_1.addZeroPadding(num1.wholeDigits, num2.wholeDigits);
+    var digits1 = util_1.convertToDigitSet(num1);
+    var digits2 = util_1.convertToDigitSet(num2);
+    // reverse order of digits so that we can traverse
+    // starting at index zero, beginning with the highest
+    // order of magnitude and going downward.
+    digits1.reverse();
+    digits2.reverse();
+    var cmp = 0;
+    digits1.forEach(function (digit1, i) {
+        if (cmp != 0) {
+            return;
+        }
+        var digit2 = digits2[i];
+        // console.log("digits: 1=" + digit1 + ", 2=" + digit2);
+        if (digit1 > digit2) {
+            // console.log("GT");
+            cmp = 1 * modifier;
+            return;
+        }
+        else if (digit2 > digit1) {
+            // console.log("LT");
+            cmp = -1 * modifier;
+            return;
+        }
+    });
+    return cmp;
 }
-exports.addNumbers = addNumbers;
+exports.compareNumbers = compareNumbers;
+// function compareDigitSets 
 
 
 /***/ }),
-/* 13 */
+/* 16 */
 /***/ (function(module, exports) {
 
 // removed by extract-text-webpack-plugin
 
 /***/ }),
-/* 14 */
+/* 17 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = __webpack_require__.p + "img/logo.png";
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=bundle-666c06.js.map
+//# sourceMappingURL=bundle-0a7e17.js.map

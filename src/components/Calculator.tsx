@@ -65,23 +65,27 @@ export class Calculator extends React.Component<undefined, CalculatorState> {
     if (!this.state.operation) {
       return;
     }
+    let newNumber: FlexibleNumber;
     if (this.state.operation == "+") {
-      const newNumber = operations.addNumbers(this.state.operationRegister, this.state.displayRegisterA);
-      this.setState({
-        operationRegister: null,
-      });
-      this.updateRegisterA(newNumber);
+      newNumber = operations.addNumbers(this.state.operationRegister, this.state.displayRegisterA);
+      
     }
     if (this.state.operation == "-") {
-      console.log("subtraction!");
+      newNumber = operations.subtractNumbers(this.state.operationRegister, this.state.displayRegisterA);
     }
     if (this.state.operation == "*") {
       console.log("multiplication!");
+      return;
     }
     if (this.state.operation == "/") {
       console.log("division!");
+      return;
     }
-    this.setState({operation: null});
+    this.setState({
+      operationRegister: null,
+      operation: null,
+    });
+    this.updateRegisterA(newNumber);
   }
 
   handleOperationClick(operation: string) {
