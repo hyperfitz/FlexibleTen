@@ -116,7 +116,7 @@ export class Calculator extends React.Component<undefined, CalculatorState> {
       negative: false,
       fractionDigits: [],
       wholeDigits: [],
-      numberBase: 16,
+      numberBase: 10,
     }
     this.setState({
       displayRegisterA: displayRegisterA,
