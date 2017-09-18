@@ -2,9 +2,9 @@ import {
   addDigitSet, deepCopy, addZeroPadding,
   convertToDigitSet, convertFromDigitSet, trimZeroPadding
 } from "./util";
-import {FlexibleNumber, newNumber} from "./number";
-import {compareNumbers} from "./compare";
-import {lookupSubtraction, lookupAddition, NumberTableEntry} from "./numbertables";
+import { FlexibleNumber, newNumber } from "./number";
+import { compareNumbers } from "./compare";
+import { lookupSubtraction, lookupAddition, NumberTableEntry } from "./numbertables";
 
 /**
  * Adds two numbers together
@@ -17,14 +17,48 @@ export function addNumbers(num1: FlexibleNumber, num2: FlexibleNumber): Flexible
   num2 = deepCopy(num2);
   addZeroPadding(num1.wholeDigits, num2.wholeDigits);
   addZeroPadding(num1.fractionDigits, num2.fractionDigits);
-  const digits1 = convertToDigitSet(num1);
-  const digits2 = convertToDigitSet(num2);
 
-  const digits3 = addDigitSet(num1.numberBase, digits1, digits2);
+  // Should result be negative?
+  let negative = false;
+  // Should we subtract instead of add? (for combining negative with positive numbers)
+  let subtract = false;
+  if (num1.negative && num2.negative) {
+    negative = true;
+  }
+  if (num1.negative != num2.negative) {
+    subtract = true;
+  }
+  // console.log("num1=" + num1.wholeDigits + ", num2=" + num2.wholeDigits + ", neg=" + negative + ", sub=" + subtract);
+  let digits3: Array<number>;
+  if (subtract) {
+    // determine if the negative number is bigger in magnitude than the
+    // positive number. Convert the negative to the positive and subtract
+    // the smaller magnitude number from the larger magnitude number.
+    const [nNum, pNum] = num1.negative ? [num1, num2] : [num2, num1];
+    nNum.negative = false;
+    const nDigits = convertToDigitSet(nNum);
+    const pDigits = convertToDigitSet(pNum);
+    switch (compareNumbers(nNum, pNum)) {
+      case 0:
+        // a positive number added to a negative number of the
+        // same magnitude equals zero
+        return newNumber(num1.numberBase);
+      case 1:
+        negative = true;
+        digits3 = subtractDigitSet(num1.numberBase, nDigits, pDigits);
+        break;
+      default:
+        digits3 = subtractDigitSet(num1.numberBase, pDigits, nDigits);
+        break;
+    }
+  } else {
+    const digits1 = convertToDigitSet(num1);
+    const digits2 = convertToDigitSet(num2);
+    digits3 = addDigitSet(num1.numberBase, digits1, digits2);
+  }
 
-
-  // TODO: figure out how to calculate negative numbers
   const result = convertFromDigitSet(digits3, num1.fractionDigits.length, num1.numberBase);
+  result.negative = negative;
   return result;
 }
 
