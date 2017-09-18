@@ -39,7 +39,6 @@ export function subtractNumbers(num1: FlexibleNumber, num2: FlexibleNumber): Fle
     return newNumber(num1.numberBase);
   }
   if (cmp == -1) {
-    console.log("swap");
     // swap so that the smaller magnitude is
     // subtracted from the larger magnitude
     [num1, num2] = [num2, num1];
@@ -49,9 +48,11 @@ export function subtractNumbers(num1: FlexibleNumber, num2: FlexibleNumber): Fle
   const digits1 = convertToDigitSet(num1);
   const digits2 = convertToDigitSet(num2);
   const digits3 = subtractDigitSet(num1.numberBase, digits1, digits2);
+  // console.log("digits1=" + digits1);
+  // console.log("digits2=" + digits2);
+  // console.log("digits3=" + digits3);
   const result = convertFromDigitSet(digits3, num1.fractionDigits.length, num1.numberBase);
   if (cmp == -1) {
-    console.log("negative");
     result.negative = true;
   }
   return result;
@@ -69,17 +70,24 @@ function subtractDigitSet(numberBase: number, num1: Array<number>, num2: Array<n
     // }
     diffs.push(diff);
   });
+
+  // DEBUG
+  // const diffArr = diffs.map(diff => diff.result + ":" + diff.carry);
+  // console.log("diffs=" + diffArr.join(","));
+  // END DEBUG
+
   const result: Array<number> = [];
-  diffs.reverse();
+  // diffs.reverse();
   let carry = 0;
   diffs.forEach(diff => {
     // subtract carry
     let diff2 = lookupSubtraction(diff.result, carry, numberBase);
+    // console.log("digit=" + diff.result + ", carry=" + carry + ", resultDigit=" + diff2.result + ", resultCarry=" + diff2.carry);
     let resultDigit = diff2.result;
     result.push(resultDigit);
     carry = diff.carry + diff2.carry;
   });
   // restore original ordering of digits
-  result.reverse();
+  // result.reverse();
   return result;
 }
