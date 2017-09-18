@@ -1,4 +1,5 @@
 import {FlexibleNumber} from "./number";
+import {lookupAddition} from "./numbertables";
 
 /**
  * Adds two digit sets together recursively
@@ -8,10 +9,14 @@ import {FlexibleNumber} from "./number";
  * next order of magnitude.
  */
 export function addDigitSet(numberBase: number, num1: Array<number>, num2: Array<number>, index: number=0, carry: number=0, result?: Array<number>): Array<number> {
+  // result is created on the first iteration
   if (result == null) {
     result = [];
   }
+  // Once the index has advanced beyond the end of both numbers, the add operation is over
   if (index >= num1.length && index >= num2.length) {
+    // if carry is set, make sure to append the last number
+    // (so that 50 + 50 = 100 and not 00)
     if (carry > 0) {
       result.push(carry);
     }
@@ -19,13 +24,17 @@ export function addDigitSet(numberBase: number, num1: Array<number>, num2: Array
   }
   const digit1 = index < num1.length ? num1[index] : 0;
   const digit2 = index < num2.length ? num2[index] : 0;
-  // console.log("add: a=" + digit1 + ", b=" + digit2);
-  const sum = digit1 + digit2 + carry;
-  const resultDigit = sum % numberBase;
-  result.push(resultDigit);
 
-  carry = Math.floor(sum / numberBase);
-  addDigitSet(numberBase, num1, num2, index + 1, carry, result);
+  // First add the two numbers, then add the carry
+  const sum = lookupAddition(digit1, digit2, numberBase);
+  const sum2 = lookupAddition(sum.result, carry, numberBase);
+  result.push(sum2.result);
+
+  carry = sum.carry + sum2.carry;
+  // carry = Math.floor(sum / numberBase);
+  addDigitSet(
+    numberBase, num1, num2, index + 1, carry, result
+  );
   return result;
 }
 

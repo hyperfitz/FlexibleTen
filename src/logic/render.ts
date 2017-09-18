@@ -31,6 +31,9 @@ export function renderNumber(number: FlexibleNumber): string {
   } else {
     arr.push("0");
   }
+  if (number.negative) {
+    arr.push("-");
+  }
   arr.reverse();
   
   if (number.fractionDigits.length) {
