@@ -64,32 +64,10 @@ export function addNumbers(num1: FlexibleNumber, num2: FlexibleNumber): Flexible
 
 /** Subtracts `num1` from `num2` */
 export function subtractNumbers(num1: FlexibleNumber, num2: FlexibleNumber): FlexibleNumber {
-  // TODO: support negative numbers
-  num1 = deepCopy(num1);
   num2 = deepCopy(num2);
-  const cmp = compareNumbers(num1, num2);
-  if (cmp == 0) {
-    // if a num1 and num2 are equal, the result is zero
-    return newNumber(num1.numberBase);
-  }
-  if (cmp == -1) {
-    // swap so that the smaller magnitude is
-    // subtracted from the larger magnitude
-    [num1, num2] = [num2, num1];
-  }
-  addZeroPadding(num1.wholeDigits, num2.wholeDigits);
-  addZeroPadding(num1.fractionDigits, num2.fractionDigits);
-  const digits1 = convertToDigitSet(num1);
-  const digits2 = convertToDigitSet(num2);
-  const digits3 = subtractDigitSet(num1.numberBase, digits1, digits2);
-  // console.log("digits1=" + digits1);
-  // console.log("digits2=" + digits2);
-  // console.log("digits3=" + digits3);
-  const result = convertFromDigitSet(digits3, num1.fractionDigits.length, num1.numberBase);
-  if (cmp == -1) {
-    result.negative = true;
-  }
-  return result;
+  // subtracting a number is the same as adding a negative number
+  num2.negative = !num2.negative;
+  return addNumbers(num1, num2);
 }
 
 function subtractDigitSet(numberBase: number, num1: Array<number>, num2: Array<number>): Array<number> {
@@ -111,7 +89,6 @@ function subtractDigitSet(numberBase: number, num1: Array<number>, num2: Array<n
   // END DEBUG
 
   const result: Array<number> = [];
-  // diffs.reverse();
   let carry = 0;
   diffs.forEach(diff => {
     // subtract carry
@@ -122,6 +99,5 @@ function subtractDigitSet(numberBase: number, num1: Array<number>, num2: Array<n
     carry = diff.carry + diff2.carry;
   });
   // restore original ordering of digits
-  // result.reverse();
   return result;
 }
