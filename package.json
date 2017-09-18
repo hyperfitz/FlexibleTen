@@ -36,10 +36,12 @@
     "phantomjs-prebuilt": "^2.1.15",
     "source-map-loader": "^0.2.1",
     "typescript": "^2.3.4",
-    "webpack": "^3.0.0"
+    "webpack": "^3.0.0",
+    "webpack-dev-server": "^2.8.2"
   },
   "scripts": {
     "runserver": "python -m SimpleHTTPServer 4200",
+    "dev": "webpack-dev-server --hot --inline",
     "build": "webpack -w",
     "build:prod": "webpack --config=webpack.config.prod.js",
     "test": "karma start"

@@ -130,9 +130,6 @@ export class Calculator extends React.Component<undefined, CalculatorState> {
             Number System: <strong>{this.state.displayRegisterA.numberBase}</strong>
           </h4>
           <NumberDisplay num={this.state.displayRegisterA} />
-          {/* <textarea rows={3} className="form-control calc-display">
-
-          </textarea> */}
         </div>
       </div>
       <div className="row">
@@ -141,9 +138,6 @@ export class Calculator extends React.Component<undefined, CalculatorState> {
             Number System: <strong>{this.state.displayRegisterB.numberBase}</strong>
           </h4>
           <NumberDisplay num={this.state.displayRegisterB} />
-          {/* <textarea rows={3} className="form-control calc-display">
-
-          </textarea> */}
         </div>
       </div>
       <div className="row">

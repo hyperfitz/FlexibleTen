@@ -104,6 +104,13 @@ describe("Number conversion", () => {
     const base2 = convert.convertNumber(base10, 2);
     expect(render.renderNumber(base2)).to.equal("10.1");
   });
+
+  it("-2.5 (base 10) -> -10.1 (base 2)", () => {
+    const base10 = flex([2], [5], 10);
+    base10.negative = true;
+    const base2 = convert.convertNumber(base10, 2);
+    expect(render.renderNumber(base2)).to.equal("-10.1");
+  });
 });
 
 /*

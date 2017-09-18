@@ -19,6 +19,7 @@ export function convertNumber(num: FlexibleNumber, toBase: number): FlexibleNumb
     result.fractionDigits = longDivision(fractionNumerator * toBase, fractionDenominator, toBase);
     trimZeroPadding(result.fractionDigits);
   }
+  result.negative = num.negative;
   return result;
 }
 
