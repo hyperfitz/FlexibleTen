@@ -7717,6 +7717,10 @@ textarea {
   text-align: right;
 }
 
-.calculator .btn {
+.calculator-btn {
   width: 100%;
+}
+
+.calculator-row {
+  margin-top: 20px;
 }

@@ -2,6 +2,7 @@ import * as React from "react";
 
 import { CalcButton } from "./CalcButton";
 import { NumberDisplay } from "./NumberDisplay";
+import { NumberSystemSelector } from "./NumberSystemSelector";
 
 import { FlexibleNumber } from "../logic/number";
 import * as convert from "../logic/convert";
@@ -14,6 +15,8 @@ export interface CalculatorState {
   operation?: string;
   fraction?: boolean;
   operationPending?: boolean;
+  showNumberSystemSelectorA: boolean;
+  showNumberSystemSelectorB: boolean;
 }
 
 export class Calculator extends React.Component<undefined, CalculatorState> {
@@ -68,7 +71,7 @@ export class Calculator extends React.Component<undefined, CalculatorState> {
     let newNumber: FlexibleNumber;
     if (this.state.operation == "+") {
       newNumber = operations.addNumbers(this.state.operationRegister, this.state.displayRegisterA);
-      
+
     }
     if (this.state.operation == "-") {
       newNumber = operations.subtractNumbers(this.state.operationRegister, this.state.displayRegisterA);
@@ -121,25 +124,87 @@ export class Calculator extends React.Component<undefined, CalculatorState> {
     });
   }
 
+  cancelUpdateNumberSystem() {
+    this.setState({
+      showNumberSystemSelectorA: false,
+      showNumberSystemSelectorB: false,
+    });
+  }
+
+  editNumberSystemA() {
+    this.setState({
+      showNumberSystemSelectorA: true,
+    });
+  }
+
+  editNumberSystemB() {
+    this.setState({
+      showNumberSystemSelectorB: true,
+    });
+  }
+
+  updateNumberSystemA(numberSystem: number) {
+    this.setState({
+      showNumberSystemSelectorA: false,
+    });
+    this.updateRegisterA(convert.convertNumber(this.state.displayRegisterA, numberSystem));
+  }
+
+  updateNumberSystemB(numberSystem: number) {
+    this.setState({
+      displayRegisterB: convert.convertNumber(this.state.displayRegisterB, numberSystem),
+      showNumberSystemSelectorB: false,
+    });
+  }
+
+  invertSign() {
+    const regA = this.state.displayRegisterA;
+    const regB = this.state.displayRegisterB;
+    regA.negative = !regA.negative;
+    regB.negative = regA.negative;
+    this.setState({
+      displayRegisterA: regA,
+      displayRegisterB: regB
+    });
+  }
+
+  isValidDigit(digit: number): boolean {
+    const result = digit < this.state.displayRegisterA.numberBase;
+    console.log(digit + ", " + this.state.displayRegisterA.numberBase + ", " + result);
+    return result;
+  }
+
   render() {
     console.log("rendering");
     return <div className="block-flat calculator">
       <div className="row">
         <div className="col-lg-12 col-md-12">
           <h4 className="text-center">
-            Number System: <strong>{this.state.displayRegisterA.numberBase}</strong>
+            Number System: <strong style={{cursor: "pointer"}}
+              onClick={this.editNumberSystemA.bind(this)}>{this.state.displayRegisterA.numberBase}</strong>
           </h4>
           <NumberDisplay num={this.state.displayRegisterA} />
         </div>
       </div>
+      <NumberSystemSelector
+        visible={this.state.showNumberSystemSelectorA}
+        numberSystem={this.state.displayRegisterA.numberBase}
+        onSelectNumberSystem={this.updateNumberSystemA.bind(this)}
+        onCancel={this.cancelUpdateNumberSystem.bind(this)}></NumberSystemSelector>
       <div className="row">
         <div className="col-lg-12 col-md-12">
           <h4 className="text-center">
-            Number System: <strong>{this.state.displayRegisterB.numberBase}</strong>
+            Number System: <strong style={{cursor: "pointer"}}
+              onClick={this.editNumberSystemB.bind(this)}>{this.state.displayRegisterB.numberBase}</strong>
           </h4>
           <NumberDisplay num={this.state.displayRegisterB} />
         </div>
       </div>
+      <NumberSystemSelector
+        visible={this.state.showNumberSystemSelectorB}
+        numberSystem={this.state.displayRegisterB.numberBase}
+        onSelectNumberSystem={this.updateNumberSystemB.bind(this)}
+        onCancel={this.cancelUpdateNumberSystem.bind(this)}></NumberSystemSelector>
       <div className="row">
         <CalcButton onClick={this.onClear.bind(this)}>C</CalcButton>
         <CalcButton>()</CalcButton>
@@ -148,29 +213,29 @@ export class Calculator extends React.Component<undefined, CalculatorState> {
       </div>
       <div className="row">
 
-        <CalcButton id="7" onClick={this.handleNumberEntry.bind(this)}>7</CalcButton>
-        <CalcButton id="8" onClick={this.handleNumberEntry.bind(this)}>8</CalcButton>
-        <CalcButton id="9" onClick={this.handleNumberEntry.bind(this)}>9</CalcButton>
+        <CalcButton disabled={!this.isValidDigit(7)} id="7" onClick={this.handleNumberEntry.bind(this)}>7</CalcButton>
+        <CalcButton disabled={!this.isValidDigit(8)} id="8" onClick={this.handleNumberEntry.bind(this)}>8</CalcButton>
+        <CalcButton disabled={!this.isValidDigit(9)} id="9" onClick={this.handleNumberEntry.bind(this)}>9</CalcButton>
         <CalcButton id="*" onClick={this.handleOperationClick.bind(this)}>*</CalcButton>
       </div>
       {/* 7,8,9, times */}
       <div className="row">
-        <CalcButton id="4" onClick={this.handleNumberEntry.bind(this)}>4</CalcButton>
-        <CalcButton id="5" onClick={this.handleNumberEntry.bind(this)}>5</CalcButton>
-        <CalcButton id="6" onClick={this.handleNumberEntry.bind(this)}>6</CalcButton>
+        <CalcButton disabled={!this.isValidDigit(4)} id="4" onClick={this.handleNumberEntry.bind(this)}>4</CalcButton>
+        <CalcButton disabled={!this.isValidDigit(5)} id="5" onClick={this.handleNumberEntry.bind(this)}>5</CalcButton>
+        <CalcButton disabled={!this.isValidDigit(6)} id="6" onClick={this.handleNumberEntry.bind(this)}>6</CalcButton>
         <CalcButton id="-" onClick={this.handleOperationClick.bind(this)}>-</CalcButton>
       </div>
       {/* 4,5,6, minus */}
       <div className="row">
-        <CalcButton id="1" onClick={this.handleNumberEntry.bind(this)}>1</CalcButton>
-        <CalcButton id="2" onClick={this.handleNumberEntry.bind(this)}>2</CalcButton>
-        <CalcButton id="3" onClick={this.handleNumberEntry.bind(this)}>3</CalcButton>
+        <CalcButton disabled={!this.isValidDigit(1)} id="1" onClick={this.handleNumberEntry.bind(this)}>1</CalcButton>
+        <CalcButton disabled={!this.isValidDigit(2)} id="2" onClick={this.handleNumberEntry.bind(this)}>2</CalcButton>
+        <CalcButton disabled={!this.isValidDigit(3)} id="3" onClick={this.handleNumberEntry.bind(this)}>3</CalcButton>
         <CalcButton id="+" onClick={this.handleOperationClick.bind(this)}>+</CalcButton>
       </div>
       {/* 1,2,3, plus */}
       <div className="row">
-        <CalcButton>&plusmn;</CalcButton>
-        <CalcButton id="0" onClick={this.handleNumberEntry.bind(this)}>0</CalcButton>
+        <CalcButton onClick={this.invertSign.bind(this)}>&plusmn;</CalcButton>
+        <CalcButton disabled={!this.isValidDigit(0)} id="0" onClick={this.handleNumberEntry.bind(this)}>0</CalcButton>
         <CalcButton onClick={this.handleDecimalClick.bind(this)}>.</CalcButton>
         <CalcButton onClick={this.handleOperation.bind(this)}>=</CalcButton>
       </div>
