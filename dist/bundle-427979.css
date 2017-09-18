@@ -7717,7 +7717,11 @@ textarea {
   text-align: right;
 }
 
-.calculator .btn {
+.calculator-btn {
   width: 100%;
 }
-/*# sourceMappingURL=bundle-0a7e17.css.map*/
+
+.calculator-row {
+  margin-top: 20px;
+}
+/*# sourceMappingURL=bundle-427979.css.map*/
