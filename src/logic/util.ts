@@ -91,7 +91,11 @@ export function deepCopy<T>(obj: T): T {
 export function convertToDigitSet(num: FlexibleNumber): Array<number> {
   const fraction = deepCopy(num.fractionDigits);
   fraction.reverse();
-  return fraction.concat(num.wholeDigits);
+  const result = fraction.concat(num.wholeDigits);
+  if (result.length == 0) {
+    result.push(0);
+  }
+  return result;
 }
 
 /**
@@ -103,6 +107,10 @@ export function convertToDigitSet(num: FlexibleNumber): Array<number> {
  */
 export function convertFromDigitSet(digits: Array<number>, decimalPlace: number, numberBase: number, negative?: boolean): FlexibleNumber {
   const wholeDigits = deepCopy(digits);
+  // Make sure that 0.001 is converted correctly
+  while (wholeDigits.length < decimalPlace) {
+    wholeDigits.push(0);
+  }
   const fractionDigits = wholeDigits.splice(0, decimalPlace);
   fractionDigits.reverse();
   trimZeroPadding(wholeDigits);
@@ -113,4 +121,11 @@ export function convertFromDigitSet(digits: Array<number>, decimalPlace: number,
     numberBase: numberBase,
     negative: negative,
   }
+}
+
+export function isZero(number: FlexibleNumber): boolean {
+  number = deepCopy(number);
+  trimZeroPadding(number.wholeDigits);
+  trimZeroPadding(number.fractionDigits);
+  return number.wholeDigits.length == 0 && number.fractionDigits.length == 0;
 }

@@ -1,6 +1,7 @@
 import {
   addDigitSet, deepCopy, addZeroPadding,
-  convertToDigitSet, convertFromDigitSet, trimZeroPadding
+  convertToDigitSet, convertFromDigitSet, trimZeroPadding,
+  isZero,
 } from "./util";
 import { FlexibleNumber, newNumber } from "./number";
 import { compareNumbers } from "./compare";
@@ -12,7 +13,6 @@ import { lookupSubtraction, lookupAddition, NumberTableEntry } from "./numbertab
  * // TODO: support negative numbers
  */
 export function addNumbers(num1: FlexibleNumber, num2: FlexibleNumber): FlexibleNumber {
-  // TODO: support negative numbers
   num1 = deepCopy(num1);
   num2 = deepCopy(num2);
   addZeroPadding(num1.wholeDigits, num2.wholeDigits);
@@ -75,29 +75,70 @@ function subtractDigitSet(numberBase: number, num1: Array<number>, num2: Array<n
   num1.forEach((digit1, index) => {
     const digit2 = num2[index];
     const diff = lookupSubtraction(digit1, digit2, numberBase);
-    // if (!diff) {
-    //   console.error("missing: 1=" + digit1 + ", 2=" + digit2 + ", base=" + numberBase);
-    //   console.log(num1);
-    //   console.log(num2);
-    // }
     diffs.push(diff);
   });
-
-  // DEBUG
-  // const diffArr = diffs.map(diff => diff.result + ":" + diff.carry);
-  // console.log("diffs=" + diffArr.join(","));
-  // END DEBUG
 
   const result: Array<number> = [];
   let carry = 0;
   diffs.forEach(diff => {
     // subtract carry
     let diff2 = lookupSubtraction(diff.result, carry, numberBase);
-    // console.log("digit=" + diff.result + ", carry=" + carry + ", resultDigit=" + diff2.result + ", resultCarry=" + diff2.carry);
     let resultDigit = diff2.result;
     result.push(resultDigit);
     carry = diff.carry + diff2.carry;
   });
-  // restore original ordering of digits
+  return result;
+}
+
+/**
+ * Multiplies two numbers and returns the product
+ */
+export function multiplyNumbers(num1: FlexibleNumber, num2: FlexibleNumber): FlexibleNumber {
+  num1 = deepCopy(num1);
+  num2 = deepCopy(num2);
+  addZeroPadding(num1.wholeDigits, num2.wholeDigits);
+  addZeroPadding(num1.fractionDigits, num2.fractionDigits);
+  const digits1 = convertToDigitSet(num1);
+  const digits2 = convertToDigitSet(num2);
+  const product = multiplyDigitSets(num1.numberBase, digits1, digits2);
+
+  // console.log("product=" + product);
+  const result = convertFromDigitSet(product, num1.fractionDigits.length + num2.fractionDigits.length, num1.numberBase);
+  // special case: zero shouldn't be negative
+  result.negative = num1.negative != num2.negative && !isZero(result);
+  return result;
+}
+
+function multiplyDigitSets(numberBase: number, num1: Array<number>, num2: Array<number>): Array<number> {
+  const resultDigitSets: Array<Array<number>> = [];
+  // console.log("mply: num1=" + num1 + ", num2=" + num2);
+  num1.forEach((digit1, index1) => {
+    num2.forEach((digit2, index2) => {
+      const shift = index1 + index2;
+      const addValue = shiftDigitSet([digit1], shift);
+      let sum = [];
+      for (let i = 0; i < digit2; i++) {
+        sum = addDigitSet(numberBase, sum, addValue);
+      }
+      // console.log("mul: d1=" + digit1 + ", d2=" + digit2 + ", idx1=" + index1 + ", idx2=" + index2 +
+      //   ", shift=" + shift + ", addValue=" + addValue + ", sum=" + sum);
+      resultDigitSets.push(sum);
+    });
+  });
+  let product: Array<number> = resultDigitSets[0];
+  for (let i = 1; i < resultDigitSets.length; i++) {
+    product = addDigitSet(numberBase, product, resultDigitSets[i]);
+  }
+  return product;
+}
+
+/**
+ * Increases the magnitude of the digit set
+ */
+function shiftDigitSet(digits: Array<number>, by: number): Array<number> {
+  const result = deepCopy(digits);
+  for (let i = 0; i < by; i++) {
+    result.unshift(0);
+  }
   return result;
 }
