@@ -1,7 +1,7 @@
 import {FlexibleNumber} from "./number";
-import {addDigitSet, trimZeroPadding} from "./util";
+import {addDigitSet, trimZeroPadding, MaxDecimalPlaces} from "./util";
 
-const MaxDecimalPlaces = 30;
+
 
 export function convertNumber(num: FlexibleNumber, toBase: number): FlexibleNumber {
   const result: FlexibleNumber = {

@@ -77,12 +77,10 @@ export class Calculator extends React.Component<undefined, CalculatorState> {
       newNumber = operations.subtractNumbers(this.state.operationRegister, this.state.displayRegisterA);
     }
     if (this.state.operation == "*") {
-      console.log("multiplication!");
-      return;
+      newNumber = operations.multiplyNumbers(this.state.operationRegister, this.state.displayRegisterA);
     }
     if (this.state.operation == "/") {
-      console.log("division!");
-      return;
+      newNumber = operations.divideNumbers(this.state.operationRegister, this.state.displayRegisterA);
     }
     this.setState({
       operationRegister: null,
@@ -152,7 +150,7 @@ export class Calculator extends React.Component<undefined, CalculatorState> {
 
   updateNumberSystemB(numberSystem: number) {
     this.setState({
-      displayRegisterB: convert.convertNumber(this.state.displayRegisterB, numberSystem),
+      displayRegisterB: convert.convertNumber(this.state.displayRegisterA, numberSystem),
       showNumberSystemSelectorB: false,
     });
   }

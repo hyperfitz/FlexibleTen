@@ -1,6 +1,8 @@
 import {FlexibleNumber} from "./number";
 import {lookupAddition} from "./numbertables";
 
+export const MaxDecimalPlaces = 30;
+
 /**
  * Adds two digit sets together recursively
  * 

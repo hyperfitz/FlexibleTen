@@ -1,10 +1,10 @@
 import {
   addDigitSet, deepCopy, addZeroPadding,
   convertToDigitSet, convertFromDigitSet, trimZeroPadding,
-  isZero,
+  isZero, MaxDecimalPlaces,
 } from "./util";
 import { FlexibleNumber, newNumber } from "./number";
-import { compareNumbers } from "./compare";
+import { compareNumbers, compareDigitSets } from "./compare";
 import { lookupSubtraction, lookupAddition, NumberTableEntry } from "./numbertables";
 
 /**
@@ -111,11 +111,21 @@ export function multiplyNumbers(num1: FlexibleNumber, num2: FlexibleNumber): Fle
 
 function multiplyDigitSets(numberBase: number, num1: Array<number>, num2: Array<number>): Array<number> {
   const resultDigitSets: Array<Array<number>> = [];
-  // console.log("mply: num1=" + num1 + ", num2=" + num2);
+  // multiply each single digit in a number
+  // by every single digit in the other number
+  // by repeatedly adding, along with the added magnitudes,
+  // and add the result.
+
+  // magnitude for each number is calculated as (number * (base ^ index)),
+  // and the added magnitudes is referred to below as "shift", because
+  // it causes a shift of that many digits to the left, an increase in
+  // orders of magnitude.
   num1.forEach((digit1, index1) => {
     num2.forEach((digit2, index2) => {
+      // How many digits to the left the result number
+      // should be shifted
       const shift = index1 + index2;
-      const addValue = shiftDigitSet([digit1], shift);
+      const addValue = shiftDigitSetLeft([digit1], shift);
       let sum = [];
       for (let i = 0; i < digit2; i++) {
         sum = addDigitSet(numberBase, sum, addValue);
@@ -132,13 +142,123 @@ function multiplyDigitSets(numberBase: number, num1: Array<number>, num2: Array<
   return product;
 }
 
+export function divideNumbers(num1: FlexibleNumber, num2: FlexibleNumber): FlexibleNumber {
+  num1 = deepCopy(num1);
+  num2 = deepCopy(num2);
+  // Copy the signs, because they get temporarily removed for this operation
+  const sign1 = num1.negative;
+  const sign2 = num2.negative;
+  num1.negative = false;
+  num2.negative = false;
+  // line the two numbers up so that the divisor is just small enough to be less
+  // and record the amount shifted to the left (positive) or to the right (negative)
+  let shift = 0;
+  // shifting to the left first, until second number is greater than or equal to the first number
+  while (compareNumbers(num2, num1) == -1) {
+    // console.log("shift left");
+    num2 = shiftNumberLeft(num2, 1);
+    shift++;
+  }
+  // now shift to the right, until the second number is less than or equal to the first number
+  while (compareNumbers(num2, num1) == 1) {
+    // console.log("shift right");
+    num2 = shiftNumberRight(num2, 1);
+    shift--;
+  }
+
+  const resultDigits = [];
+  // Keep track of the number of shifts during division
+  let resultShift = 0;
+  // Add shift to the result length to enforce the effective
+  // numebr of max digits
+// OuterLoop:
+  while (resultDigits.length + shift < MaxDecimalPlaces) {
+    let resultDigit = 0;
+    // subtract num2 from num1 repeatedly until
+    // num1 is smaller
+    while (compareNumbers(num1, num2) != -1) {
+      num1 = subtractNumbers(num1, num2);
+      resultDigit++;
+    }
+    // console.log("resultDigit: " + resultDigit);
+    resultDigits.unshift(resultDigit);
+    // This means that there is no remainder, and we're done.
+    if (isZero(num1)) {
+      break;
+    }
+    // only shift left if max decimal places haven't been reached
+    // in order to avoid an offset by 1 error
+    if (resultDigits.length + shift < MaxDecimalPlaces) {
+      // Shift num1 left
+      num1 = shiftNumberLeft(num1, 1);
+      resultShift++;
+    }
+    
+  }
+
+  // addZeroPadding(num1.wholeDigits, num2.wholeDigits);
+  // addZeroPadding(num1.fractionDigits, num2.fractionDigits);
+  // const digits1 = convertToDigitSet(num1);
+  // const digits2 = convertToDigitSet(num2);
+  let result = newNumber(num1.numberBase);
+  // Assign digits and shift the result appropriately
+  result.wholeDigits = resultDigits;
+  // combine initial shift with shift during division
+  resultShift = shift - resultShift;
+  if (resultShift > 0) {
+    result = shiftNumberLeft(result, resultShift);
+  } else if (resultShift < 0) {
+    result = shiftNumberRight(result, -resultShift);
+  }
+  // result is only negative if signs of two
+  // input numbers weren't equal
+  result.negative = sign1 != sign2;
+  return result;
+}
+
+/**
+ * Increases the magnitude of a number
+ */
+export function shiftNumberLeft(num: FlexibleNumber, by: number): FlexibleNumber {
+  num = deepCopy(num);
+  for (let i = 0; i < by; i++) {
+    const digit = num.fractionDigits.length > 0 ? num.fractionDigits.shift() : 0;
+    num.wholeDigits.unshift(digit);
+  }
+  return num;
+}
+
+/**
+ * Decreases the magnitude of a number
+ */
+export function shiftNumberRight(num: FlexibleNumber, by: number): FlexibleNumber {
+  num = deepCopy(num);
+  for (let i = 0; i < by; i++) {
+    const digit = num.wholeDigits.length > 0 ? num.wholeDigits.shift() : 0;
+    num.fractionDigits.unshift(digit);
+  }
+  
+  return num;
+}
+
 /**
  * Increases the magnitude of the digit set
  */
-function shiftDigitSet(digits: Array<number>, by: number): Array<number> {
+function shiftDigitSetLeft(digits: Array<number>, by: number): Array<number> {
   const result = deepCopy(digits);
   for (let i = 0; i < by; i++) {
     result.unshift(0);
+  }
+  return result;
+}
+
+/**
+ * Decreases the magnitude of a digit set
+ */
+function shiftDigitSetRight(digits: Array<number>, by: number): Array<number> {
+  const result = deepCopy(digits);
+  for (let i = 0; i < by; i++) {
+    result.push(0);
   }
   return result;
 }

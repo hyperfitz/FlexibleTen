@@ -1,6 +1,6 @@
 import { expect } from "chai";
 
-import { addNumbers, subtractNumbers, multiplyNumbers} from "./operations";
+import { addNumbers, subtractNumbers, multiplyNumbers, shiftNumberRight, shiftNumberLeft, divideNumbers} from "./operations";
 import { parseNumber, renderNumber } from "./render";
 
 function add10(num1String: string, num2String: string): string {
@@ -280,5 +280,88 @@ describe("Multiply operation", () => {
 
   it("base10: -10 * 10 = -100", () => {
     expect(mul10("-10", "10")).to.equal("-100");
+  });
+});
+
+function lshift10(numString: string, by: number): string {
+  let num = parseNumber(numString, 10);
+  num = shiftNumberLeft(num, by);
+  return renderNumber(num);
+}
+
+function rshift10(numString: string, by: number): string {
+  let num = parseNumber(numString, 10);
+  num = shiftNumberRight(num, by);
+  return renderNumber(num);
+}
+
+describe("Shift operation", () => {
+  it("1 << 1 = 10", () => {
+    expect(lshift10("1", 1)).to.equal("10");
+  });
+
+  it("1 << 2 = 100", () => {
+    expect(lshift10("1", 2)).to.equal("100");
+  });
+
+  it("1 >> 1 = 0.1", () => {
+    expect(rshift10("1", 1)).to.equal("0.1");
+  });
+
+  it("1 >> 2 = 0.01", () => {
+    expect(rshift10("1", 2)).to.equal("0.01");
+  });
+
+  it("1234 >> 2 = 12.34", () => {
+    expect(rshift10("1234", 2)).to.equal("12.34");
+  });
+});
+
+function div10(num1String: string, num2String: string): string {
+  const num1 = parseNumber(num1String, 10);
+  const num2 = parseNumber(num2String, 10);
+  const num3 = divideNumbers(num1, num2);
+  return renderNumber(num3);
+}
+
+describe("Divide operation", () => {
+  it("1 / 1 = 1", () => {
+    expect(div10("1", "1")).to.equal("1");
+  });
+
+  it("10 / 1 = 10", () => {
+    expect(div10("10", "1")).to.equal("10");
+  });
+
+  it("1 / 10 = 0.1", () => {
+    expect(div10("1", "10")).to.equal("0.1");
+  });
+
+  it("2468 / 1234 = 2", () => {
+    expect(div10("2468", "1234")).to.equal("2");
+  });
+
+  it("2468 / 123.4 = 20", () => {
+    expect(div10("2468", "123.4")).to.equal("20");
+  });
+
+  it("246.8 / 1234 = 0.2", () => {
+    expect(div10("246.8", "1234")).to.equal("0.2");
+  });
+
+  it("24.68 / 12.34 = 2", () => {
+    expect(div10("24.68", "12.34")).to.equal("2");
+  });
+
+  it("1 / -1 = -1", () => {
+    expect(div10("1", "-1")).to.equal("-1");
+  });
+
+  it("-1 / -1 = 1", () => {
+    expect(div10("-1", "-1")).to.equal("1");
+  });
+
+  it("1 / 3 = 0.3333...", () => {
+    expect(div10("1", "3")).to.equal("0.3333333333333333333333333333333");
   });
 });
