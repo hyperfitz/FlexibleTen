@@ -3,6 +3,7 @@ import * as React from "react";
 import { CalcButton } from "./CalcButton";
 import { NumberDisplay } from "./NumberDisplay";
 import { NumberSystemSelector } from "./NumberSystemSelector";
+import { CalculatorDetails } from "./CalculatorDetails";
 
 import { FlexibleNumber } from "../logic/number";
 import * as convert from "../logic/convert";
@@ -182,7 +183,7 @@ export class Calculator extends React.Component<undefined, CalculatorState> {
       <div className="row">
         <div className="col-lg-12 col-md-12">
           <h4 className="text-center">
-            Number System: <strong style={{cursor: "pointer"}}
+            Number System: <strong style={{ cursor: "pointer" }}
               onClick={this.editNumberSystemA.bind(this)}>{this.state.displayRegisterA.numberBase}</strong>
           </h4>
           <NumberDisplay num={this.state.displayRegisterA} onChange={this.handleNumberUpdate.bind(this)} />
@@ -196,7 +197,7 @@ export class Calculator extends React.Component<undefined, CalculatorState> {
       <div className="row">
         <div className="col-lg-12 col-md-12">
           <h4 className="text-center">
-            Number System: <strong style={{cursor: "pointer"}}
+            Number System: <strong style={{ cursor: "pointer" }}
               onClick={this.editNumberSystemB.bind(this)}>{this.state.displayRegisterB.numberBase}</strong>
           </h4>
           <NumberDisplay num={this.state.displayRegisterB} disabled={true} />
@@ -207,6 +208,10 @@ export class Calculator extends React.Component<undefined, CalculatorState> {
         numberSystem={this.state.displayRegisterB.numberBase}
         onSelectNumberSystem={this.updateNumberSystemB.bind(this)}
         onCancel={this.cancelUpdateNumberSystem.bind(this)}></NumberSystemSelector>
+      <CalculatorDetails operationRegister={this.state.operationRegister}
+        operator={this.state.operation}
+        registerA={this.state.displayRegisterA}
+        registerB={this.state.displayRegisterB}/>
       <div className="row">
         <CalcButton onClick={this.onClear.bind(this)}>C</CalcButton>
         <CalcButton disabled={true}>()</CalcButton>
