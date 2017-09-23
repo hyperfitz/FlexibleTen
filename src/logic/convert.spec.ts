@@ -76,7 +76,7 @@ describe("Number conversion", () => {
   });
 
   it("should convert 0.25 (base 10) to 0.01 (base 2)", () => {
-    const base10 = flex([], [5, 2], 10);
+    const base10 = flex([], [2, 5], 10);
     const base2 = convert.convertNumber(base10, 2);
     expect(render.renderNumber(base2)).to.equal("0.01");
   });
@@ -110,6 +110,13 @@ describe("Number conversion", () => {
     base10.negative = true;
     const base2 = convert.convertNumber(base10, 2);
     expect(render.renderNumber(base2)).to.equal("-10.1");
+  });
+
+  it("0.333... (base 10) -> 0.333... (base 10)", () => {
+    // early conversion inaccuracy caused this test to fail
+    const longNumber = "0.333333333333333333333333333333";
+    const result = convert.convertNumber(render.parseNumber(longNumber, 10), 10);
+    expect(render.renderNumber(result)).to.equal(longNumber);
   });
 });
 

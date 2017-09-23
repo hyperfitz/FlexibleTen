@@ -7,6 +7,9 @@ import { FlexibleNumber, newNumber } from "./number";
 import { compareNumbers, compareDigitSets } from "./compare";
 import { lookupSubtraction, lookupAddition, NumberTableEntry } from "./numbertables";
 
+// TODO: remove this. only used for debugging
+import * as render from "./render";
+
 /**
  * Adds two numbers together
  * 
@@ -70,11 +73,14 @@ export function subtractNumbers(num1: FlexibleNumber, num2: FlexibleNumber): Fle
   return addNumbers(num1, num2);
 }
 
-function subtractDigitSet(numberBase: number, num1: Array<number>, num2: Array<number>): Array<number> {
+export function subtractDigitSet(numberBase: number, num1: Array<number>, num2: Array<number>): Array<number> {
   const diffs: Array<NumberTableEntry> = [];
   num1.forEach((digit1, index) => {
     const digit2 = num2[index];
     const diff = lookupSubtraction(digit1, digit2, numberBase);
+    if (!diff) {
+      throw new Error(`Failed sub lookup! base=${numberBase}, digit1=${digit1}, digit2=${digit2}`);
+    }
     diffs.push(diff);
   });
 
@@ -109,7 +115,7 @@ export function multiplyNumbers(num1: FlexibleNumber, num2: FlexibleNumber): Fle
   return result;
 }
 
-function multiplyDigitSets(numberBase: number, num1: Array<number>, num2: Array<number>): Array<number> {
+export function multiplyDigitSets(numberBase: number, num1: Array<number>, num2: Array<number>): Array<number> {
   const resultDigitSets: Array<Array<number>> = [];
   // multiply each single digit in a number
   // by every single digit in the other number
@@ -166,13 +172,13 @@ export function divideNumbers(num1: FlexibleNumber, num2: FlexibleNumber): Flexi
     shift--;
   }
 
+  // console.log(`Division: num1=${render.renderNumber(num1)}, num2=${render.renderNumber(num2)}, shift=${shift}`);
   const resultDigits = [];
   // Keep track of the number of shifts during division
   let resultShift = 0;
   // Add shift to the result length to enforce the effective
   // numebr of max digits
-// OuterLoop:
-  while (resultDigits.length + shift < MaxDecimalPlaces) {
+  while (Math.max(resultDigits.length, resultDigits.length + shift) <= MaxDecimalPlaces) {
     let resultDigit = 0;
     // subtract num2 from num1 repeatedly until
     // num1 is smaller
@@ -182,18 +188,19 @@ export function divideNumbers(num1: FlexibleNumber, num2: FlexibleNumber): Flexi
     }
     // console.log("resultDigit: " + resultDigit);
     resultDigits.unshift(resultDigit);
+    // console.log(`div step: digit=${resultDigit}, accum=${resultDigits}, accumSize=${resultDigits.length}, resultShift=${resultShift}, num1=${render.renderNumber(num1)}, num2=${render.renderNumber(num2)}`);
     // This means that there is no remainder, and we're done.
     if (isZero(num1)) {
       break;
     }
     // only shift left if max decimal places haven't been reached
     // in order to avoid an offset by 1 error
-    if (resultDigits.length + shift < MaxDecimalPlaces) {
+    
+    if (Math.max(resultDigits.length, resultDigits.length + shift) <= MaxDecimalPlaces) {
       // Shift num1 left
       num1 = shiftNumberLeft(num1, 1);
       resultShift++;
     }
-    
   }
 
   // addZeroPadding(num1.wholeDigits, num2.wholeDigits);
@@ -210,9 +217,24 @@ export function divideNumbers(num1: FlexibleNumber, num2: FlexibleNumber): Flexi
   } else if (resultShift < 0) {
     result = shiftNumberRight(result, -resultShift);
   }
+  // TODO: this could be rounded instead of truncated.
+  while(result.fractionDigits.length > MaxDecimalPlaces) {
+    result.fractionDigits.pop();
+  }
+  trimZeroPadding(result.fractionDigits);
+  
   // result is only negative if signs of two
   // input numbers weren't equal
   result.negative = sign1 != sign2;
+  return result;
+}
+
+/** Raises a number to the power of an exponent */
+export function pow(num: FlexibleNumber, exponent: number): FlexibleNumber {
+  let result = num;
+  for (let i = 1; i < exponent; i++) {
+    result = multiplyNumbers(result, num);
+  }
   return result;
 }
 
