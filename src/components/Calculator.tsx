@@ -168,8 +168,12 @@ export class Calculator extends React.Component<undefined, CalculatorState> {
 
   isValidDigit(digit: number): boolean {
     const result = digit < this.state.displayRegisterA.numberBase;
-    console.log(digit + ", " + this.state.displayRegisterA.numberBase + ", " + result);
+    // console.log(digit + ", " + this.state.displayRegisterA.numberBase + ", " + result);
     return result;
+  }
+
+  handleNumberUpdate(newNumber: FlexibleNumber) {
+    this.updateRegisterA(newNumber);
   }
 
   render() {
@@ -181,7 +185,7 @@ export class Calculator extends React.Component<undefined, CalculatorState> {
             Number System: <strong style={{cursor: "pointer"}}
               onClick={this.editNumberSystemA.bind(this)}>{this.state.displayRegisterA.numberBase}</strong>
           </h4>
-          <NumberDisplay num={this.state.displayRegisterA} />
+          <NumberDisplay num={this.state.displayRegisterA} onChange={this.handleNumberUpdate.bind(this)} />
         </div>
       </div>
       <NumberSystemSelector
@@ -195,7 +199,7 @@ export class Calculator extends React.Component<undefined, CalculatorState> {
             Number System: <strong style={{cursor: "pointer"}}
               onClick={this.editNumberSystemB.bind(this)}>{this.state.displayRegisterB.numberBase}</strong>
           </h4>
-          <NumberDisplay num={this.state.displayRegisterB} />
+          <NumberDisplay num={this.state.displayRegisterB} disabled={true} />
         </div>
       </div>
       <NumberSystemSelector

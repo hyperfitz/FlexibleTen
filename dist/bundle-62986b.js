@@ -8918,8 +8918,11 @@ var Calculator = (function (_super) {
     };
     Calculator.prototype.isValidDigit = function (digit) {
         var result = digit < this.state.displayRegisterA.numberBase;
-        console.log(digit + ", " + this.state.displayRegisterA.numberBase + ", " + result);
+        // console.log(digit + ", " + this.state.displayRegisterA.numberBase + ", " + result);
         return result;
+    };
+    Calculator.prototype.handleNumberUpdate = function (newNumber) {
+        this.updateRegisterA(newNumber);
     };
     Calculator.prototype.render = function () {
         console.log("rendering");
@@ -8929,14 +8932,14 @@ var Calculator = (function (_super) {
                     React.createElement("h4", { className: "text-center" },
                         "Number System: ",
                         React.createElement("strong", { style: { cursor: "pointer" }, onClick: this.editNumberSystemA.bind(this) }, this.state.displayRegisterA.numberBase)),
-                    React.createElement(NumberDisplay_1.NumberDisplay, { num: this.state.displayRegisterA }))),
+                    React.createElement(NumberDisplay_1.NumberDisplay, { num: this.state.displayRegisterA, onChange: this.handleNumberUpdate.bind(this) }))),
             React.createElement(NumberSystemSelector_1.NumberSystemSelector, { visible: this.state.showNumberSystemSelectorA, numberSystem: this.state.displayRegisterA.numberBase, onSelectNumberSystem: this.updateNumberSystemA.bind(this), onCancel: this.cancelUpdateNumberSystem.bind(this) }),
             React.createElement("div", { className: "row" },
                 React.createElement("div", { className: "col-lg-12 col-md-12" },
                     React.createElement("h4", { className: "text-center" },
                         "Number System: ",
                         React.createElement("strong", { style: { cursor: "pointer" }, onClick: this.editNumberSystemB.bind(this) }, this.state.displayRegisterB.numberBase)),
-                    React.createElement(NumberDisplay_1.NumberDisplay, { num: this.state.displayRegisterB }))),
+                    React.createElement(NumberDisplay_1.NumberDisplay, { num: this.state.displayRegisterB, disabled: true }))),
             React.createElement(NumberSystemSelector_1.NumberSystemSelector, { visible: this.state.showNumberSystemSelectorB, numberSystem: this.state.displayRegisterB.numberBase, onSelectNumberSystem: this.updateNumberSystemB.bind(this), onCancel: this.cancelUpdateNumberSystem.bind(this) }),
             React.createElement("div", { className: "row" },
                 React.createElement(CalcButton_1.CalcButton, { onClick: this.onClear.bind(this) }, "C"),
@@ -9031,10 +9034,60 @@ var NumberDisplay = (function (_super) {
     function NumberDisplay() {
         return _super !== null && _super.apply(this, arguments) || this;
     }
+    NumberDisplay.prototype.updateNum = function (num) {
+        this.setState({
+            displayText: render.renderNumber(num),
+            valid: true,
+        });
+    };
+    NumberDisplay.prototype.componentWillReceiveProps = function (newProps) {
+        this.updateNum(newProps.num);
+    };
+    NumberDisplay.prototype.componentWillMount = function () {
+        this.updateNum(this.props.num);
+    };
+    NumberDisplay.prototype.handleTextInput = function (evt) {
+        // Little hack to parse empty string as zero
+        var text = evt.currentTarget.value;
+        console.log(text);
+        var valid = true;
+        var newNumber;
+        try {
+            newNumber = render.parseNumber(text, this.props.num.numberBase);
+            if (this.props.onChange) {
+                this.props.onChange(newNumber);
+            }
+        }
+        catch (e) {
+            valid = false;
+        }
+        this.setState({
+            displayText: text,
+            valid: valid,
+        });
+    };
+    NumberDisplay.prototype.updateFocused = function (focused) {
+        var text = this.state.displayText;
+        if (!focused && text == "") {
+            text = "0";
+        }
+        else if (focused && text == "0") {
+            text = "";
+        }
+        this.setState({
+            focused: focused,
+            displayText: text,
+        });
+    };
     NumberDisplay.prototype.render = function () {
-        var result = render.renderNumber(this.props.num);
-        console.log("number display render - " + result);
-        return React.createElement("div", { className: "form-control calc-display" }, result);
+        var _this = this;
+        var result = this.state.displayText;
+        // console.log("number display render - " + result);
+        var className = "form-control calc-display";
+        if (!this.state.valid) {
+            className = className + " parsley-error";
+        }
+        return React.createElement("input", { onChange: this.handleTextInput.bind(this), disabled: this.props.disabled, type: "text", className: className, value: result, onFocus: function () { return _this.updateFocused(true); }, onBlur: function () { return _this.updateFocused(false); } });
     };
     return NumberDisplay;
 }(React.Component));
@@ -9091,6 +9144,13 @@ function renderNumber(number) {
     return arr.join("");
 }
 exports.renderNumber = renderNumber;
+function validateDigits(digits, numberBase) {
+    for (var i = 0; i < digits.length; i++) {
+        if (digits[i] < 0 || digits[i] >= numberBase) {
+            throw new Error("invalid digits for base " + numberBase + ": " + digits);
+        }
+    }
+}
 /** Parses a number string representation into a `FlexibleNumber` */
 function parseNumber(numberStr, numberBase) {
     var negative = numberStr.indexOf("-") == 0;
@@ -9107,6 +9167,11 @@ function parseNumber(numberStr, numberBase) {
         num.wholeDigits = parseDigits(parts[0]);
         num.fractionDigits = parseDigits(parts[1]);
     }
+    if (decimal != -1 && num.fractionDigits.length == 0) {
+        throw new Error("No fractional component after decimal");
+    }
+    validateDigits(num.wholeDigits, numberBase);
+    validateDigits(num.fractionDigits, numberBase);
     // re-order so that least significant digit comes first
     num.wholeDigits.reverse();
     util_1.trimZeroPadding(num.wholeDigits);
@@ -21248,4 +21313,4 @@ module.exports = __webpack_require__.p + "img/logo.png";
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=bundle-3a8c2f.js.map
+//# sourceMappingURL=bundle-62986b.js.map

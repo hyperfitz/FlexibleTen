@@ -45,6 +45,14 @@ export function renderNumber(number: FlexibleNumber): string {
   return arr.join("");
 }
 
+function validateDigits(digits: Array<number>, numberBase: number) {
+  for (let i = 0; i < digits.length; i++) {
+    if (digits[i] < 0 || digits[i] >= numberBase) {
+      throw new Error(`invalid digits for base ${numberBase}: ${digits}`);
+    }
+  }
+}
+
 /** Parses a number string representation into a `FlexibleNumber` */
 export function parseNumber(numberStr: string, numberBase: number): FlexibleNumber {
   const negative = numberStr.indexOf("-") == 0;
@@ -60,6 +68,11 @@ export function parseNumber(numberStr: string, numberBase: number): FlexibleNumb
     num.wholeDigits = parseDigits(parts[0]);
     num.fractionDigits = parseDigits(parts[1]);
   }
+  if (decimal != -1 && num.fractionDigits.length == 0) {
+    throw new Error("No fractional component after decimal");
+  }
+  validateDigits(num.wholeDigits, numberBase);
+  validateDigits(num.fractionDigits, numberBase);
   // re-order so that least significant digit comes first
   num.wholeDigits.reverse();
   trimZeroPadding(num.wholeDigits);
