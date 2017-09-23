@@ -209,8 +209,8 @@ export class Calculator extends React.Component<undefined, CalculatorState> {
         onCancel={this.cancelUpdateNumberSystem.bind(this)}></NumberSystemSelector>
       <div className="row">
         <CalcButton onClick={this.onClear.bind(this)}>C</CalcButton>
-        <CalcButton>()</CalcButton>
-        <CalcButton id="%" onClick={this.handleOperationClick.bind(this)}>%</CalcButton>
+        <CalcButton disabled={true}>()</CalcButton>
+        <CalcButton disabled={true} id="%" onClick={this.handleOperationClick.bind(this)}>%</CalcButton>
         <CalcButton id="/" onClick={this.handleOperationClick.bind(this)}>/</CalcButton>
       </div>
       <div className="row">

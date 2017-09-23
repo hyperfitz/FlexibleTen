@@ -8943,8 +8943,8 @@ var Calculator = (function (_super) {
             React.createElement(NumberSystemSelector_1.NumberSystemSelector, { visible: this.state.showNumberSystemSelectorB, numberSystem: this.state.displayRegisterB.numberBase, onSelectNumberSystem: this.updateNumberSystemB.bind(this), onCancel: this.cancelUpdateNumberSystem.bind(this) }),
             React.createElement("div", { className: "row" },
                 React.createElement(CalcButton_1.CalcButton, { onClick: this.onClear.bind(this) }, "C"),
-                React.createElement(CalcButton_1.CalcButton, null, "()"),
-                React.createElement(CalcButton_1.CalcButton, { id: "%", onClick: this.handleOperationClick.bind(this) }, "%"),
+                React.createElement(CalcButton_1.CalcButton, { disabled: true }, "()"),
+                React.createElement(CalcButton_1.CalcButton, { disabled: true, id: "%", onClick: this.handleOperationClick.bind(this) }, "%"),
                 React.createElement(CalcButton_1.CalcButton, { id: "/", onClick: this.handleOperationClick.bind(this) }, "/")),
             React.createElement("div", { className: "row" },
                 React.createElement(CalcButton_1.CalcButton, { disabled: !this.isValidDigit(7), id: "7", onClick: this.handleNumberEntry.bind(this) }, "7"),
@@ -21313,4 +21313,4 @@ module.exports = __webpack_require__.p + "img/logo.png";
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=bundle-62986b.js.map
+//# sourceMappingURL=bundle-bce012.js.map
