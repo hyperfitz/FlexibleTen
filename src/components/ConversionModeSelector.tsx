@@ -1,18 +1,43 @@
 import * as React from "react";
 import * as RB from "react-bootstrap";
 
+/**
+ * Indicates the mode of conversion between two different number displays.
+ */
 export enum ConversionMode {
+  /**
+   * The secondary display always mirrors the result of the primary display.
+   */
   mirror,
+  /**
+   * The secondary display result is calculated independently of the primary display.
+   */
   operation,
 }
 
+/**
+ * Props configuration for `ConversionModeSelector`
+ */
 export interface ConversionModeSelectorProps {
+  /**
+   * Currently selected conversion mode
+   */
   mode: ConversionMode;
+
+  /**
+   * Invoked when the conversion mode icon is clicked
+   */
   onModeChange: (newMode: ConversionMode) => void;
 }
 
+/**
+ * This component allows the user to switch between different conversion modes.
+ */
 export class ConversionModeSelector extends React.Component<ConversionModeSelectorProps> {
 
+  /**
+   * Toggles conversion mode
+   */
   handleClick() {
     // switch modes
     const newMode = this.props.mode == ConversionMode.mirror ? ConversionMode.operation : ConversionMode.mirror;

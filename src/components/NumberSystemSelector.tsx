@@ -1,19 +1,44 @@
 import * as React from "react";
 import * as RB from "react-bootstrap";
 
+/**
+ * Props configuration for `NumberSystemSelector`
+ */
 export interface NumberSystemSelectorProps {
+  /**
+   * The currently selected number system
+   */
   numberSystem: number;
+  
+  /**
+   * True if the selector dialog should be displayed
+   */
   visible: boolean;
+
+  /**
+   * Invoked when the selection is canceled.
+   */
   onCancel: () => void;
+
+  /**
+   * Invoked when a number system has been selected.
+   */
   onSelectNumberSystem: (numberSystem: number) => void;
 }
 
+/**
+ * Pop-up dialog that allows the user to select a number system.
+ */
 export class NumberSystemSelector extends React.Component<NumberSystemSelectorProps> {
 
+  // Notify the parent component that the selection was canceled.
   handleModalHide() {
     this.props.onCancel();
   }
 
+  /**
+   * Render a row of number system buttons
+   */
   renderButtons(start: number, end: number) {
     const numberSystems: Array<number> = [];
     for (let i = start; i <= end; i++) {
@@ -50,12 +75,34 @@ export class NumberSystemSelector extends React.Component<NumberSystemSelectorPr
   }
 }
 
+/**
+ * Props configuration for `NumberSystemButton`
+ */
 interface NumberSystemButtonProps {
+  /**
+   * True if the button represents the currently selected number system.
+   * 
+   * If true, the number will be displayed as selected.
+   */
   isSelected: boolean;
+
+  /**
+   * The number system that the button represents
+   */
   numberSystem: number;
+
+  /**
+   * Invoked when the button is clicked.
+   */
   onSelectNumberSystem: (numberSystem: number) => void;
 }
 
+/**
+ * An individual button in the `NumberSystemSelector`.
+ * 
+ * When one of these buttons is clicked, the parent component is notified
+ * that a number system has been selected.
+ */
 class NumberSystemButton extends React.Component<NumberSystemButtonProps> {
   render() {
     const className = "btn calculator-btn " + (this.props.isSelected ? "btn-primary" : "btn-default");

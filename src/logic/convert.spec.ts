@@ -4,6 +4,11 @@ import {FlexibleNumber, newNumber} from "./number";
 import * as convert from "./convert";
 import * as render from "./render";
 
+/**
+ * short-hand for number creation.
+ * 
+ * TODO: replace this with a string-based version and update conversion tests.
+ */
 function flex(wholeDigits: Array<number>, fractionDigits: Array<number>, numberBase: number): FlexibleNumber {
   const result: FlexibleNumber = {
     numberBase: numberBase,

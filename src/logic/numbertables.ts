@@ -32,6 +32,9 @@ function generateNumberTables(operation: (num1: number, num2: number, base: numb
   return tables;
 }
 
+/**
+ * Generates tables to look up digit addition results in each number base.
+ */
 function generateAdditionTables(): NumberTable {
   return generateNumberTables((num1: number, num2: number, base: number) => {
     const result = (num1 + num2) % base;
@@ -45,6 +48,9 @@ function generateAdditionTables(): NumberTable {
 
 const AdditionTables: NumberTable = generateAdditionTables();
 
+/**
+ * Generates tables to look up digit subtraction results in each number base.
+ */
 function generateSubtractionTables(): NumberTable {
   return generateNumberTables((num1: number, num2: number, base: number) => {
     let result = num1 - num2;
@@ -61,10 +67,24 @@ function generateSubtractionTables(): NumberTable {
 
 const SubtractionTables: NumberTable = generateSubtractionTables();
 
+/**
+ * Looks up the result of a digit addition for the specified number base.
+ * 
+ * @param num1 Left operand
+ * @param num2 Right operand
+ * @param base Number base of each digit of the operation
+ */
 export function lookupAddition(num1: number, num2: number, base: number): NumberTableEntry {
   return AdditionTables[base][num1][num2];
 }
 
+/**
+ * Looks up the result of a digit subtraction for the specified number base.
+ * 
+ * @param num1 Left operand
+ * @param num2 Right operand
+ * @param base Number base of each digit of the operation
+ */
 export function lookupSubtraction(num1: number, num2: number, base: number): NumberTableEntry {
   return SubtractionTables[base][num1][num2];
 }

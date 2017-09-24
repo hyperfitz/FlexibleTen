@@ -5,6 +5,12 @@ import * as compare from "./compare";
 
 // import * as render from "./render";
 
+/**
+ * Converts a `FlexibleNumber` from one number system to another.
+ * 
+ * @param num `FlexibleNumber` to convert
+ * @param toBase The target number system the number should be converted to.
+ */
 export function convertNumber(num: FlexibleNumber, toBase: number): FlexibleNumber {
   num = deepCopy(num);
   const result: FlexibleNumber = {
@@ -12,6 +18,7 @@ export function convertNumber(num: FlexibleNumber, toBase: number): FlexibleNumb
     fractionDigits: [],
     numberBase: toBase,
   };
+  // Convert the whole digits first
   if (num.wholeDigits.length) {
     result.wholeDigits = convertDigitSet(num.wholeDigits, num.numberBase, toBase);
   }
@@ -28,13 +35,9 @@ export function convertNumber(num: FlexibleNumber, toBase: number): FlexibleNumb
     for (let i = 0; i < num.fractionDigits.length; i++) {
       denominatorDigits.unshift(0);
     }
-    // console.log(`convert fraction: numDigits=${numeratorDigits}, denDigits=${denominatorDigits}`);
-    // console.log(`denom: pre=${denominatorDigits}`);
     denominatorDigits = convertDigitSet(denominatorDigits, num.numberBase, toBase);
-    // console.log(`denom: post=${denominatorDigits}`);
     const denominator = convertFromDigitSet(denominatorDigits, 0, toBase, false);
     const numerator = convertFromDigitSet(numeratorDigits, 0, toBase, false);
-    // console.log(`convert fraction: den=${render.renderNumber(numerator)}, num=${render.renderNumber(denominator)}`);
     const quotient = operations.divideNumbers(numerator, denominator);
     result.fractionDigits = quotient.fractionDigits;
   }
@@ -42,6 +45,13 @@ export function convertNumber(num: FlexibleNumber, toBase: number): FlexibleNumb
   return result;
 }
 
+/**
+ * Converts a set of digits from one number system to another.
+ * 
+ * @param digits Digits to convert
+ * @param srcBase The number system of the digits
+ * @param destBase The target number system
+ */
 function convertDigitSet(digits: Array<number>, srcBase: number, destBase: number): Array<number> {
   // get a representation of the destination base in the source number system
   const destBaseInSrc = getBaseRepresentation(destBase, srcBase);
@@ -67,11 +77,21 @@ function convertDigitSet(digits: Array<number>, srcBase: number, destBase: numbe
     }
     destDigits.unshift(destDigit);
   }
-  // console.log(`digits=${digits}, destDigits=${destDigits}, destBaseInSrc=${destBaseInSrc}, srcBase=${srcBase}, destBase=${destBase}`);
   return destDigits;
-  
 }
 
+/**
+ * Gets a representation of a number base in a different number system
+ * 
+ * Base `2` would be represented in base `[0,1]` ("10") as `2`, but
+ * base `10` would be represented in base `2` as `[0,1,0,1]` ("1010").
+ * 
+ * In theory these could be pre-calculated but for now they are not.
+ * 
+ * @param src Number base to convert
+ * @param toBase Target number system
+ * @param result Optional parameter used by recursive call to keep track of the result.
+ */
 function getBaseRepresentation(src: number, toBase: number, result: Array<number>=null): Array<number> {
   // console.log("convert: num=" + src);
   if (result == null) {

@@ -4,6 +4,10 @@ import {newNumber} from "./number";
 import * as render from "./render";
 import * as compare from "./compare";
 
+/**
+ * Convenience function to compare two numbers as strings and return
+ * the result as a string.
+ */
 function compareNumbers(num1String: string, num2String: string): number {
   const num1 = render.parseNumber(num1String, 10);
   const num2 = render.parseNumber(num2String, 10);

@@ -125,6 +125,9 @@ export function convertFromDigitSet(digits: Array<number>, decimalPlace: number,
   }
 }
 
+/**
+ * Checks if a `FlexibleNumber` is equal to zero.
+ */
 export function isZero(number: FlexibleNumber): boolean {
   number = deepCopy(number);
   trimZeroPadding(number.wholeDigits);

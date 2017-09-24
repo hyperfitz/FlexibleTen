@@ -3,13 +3,31 @@ import * as React from "react";
 import { FlexibleNumber } from "../logic/number";
 import * as render from "../logic/render";
 
+/**
+ * Props configuration for `CalculatorDetails`
+ */
 export interface CalculatorDetailsProps {
+  /**
+   * Pending operation
+   */
   operator?: string;
+  /**
+   * Top display number
+   */
   registerA?: FlexibleNumber;
+  /**
+   * Bottom display number
+   */
   registerB?: FlexibleNumber;
+  /**
+   * Stored left operand for the pending operation.
+   */
   operationRegister?: FlexibleNumber;
 }
 
+/**
+ * Shows details about the current state of the calculator.
+ */
 export class CalculatorDetails extends React.Component<CalculatorDetailsProps> {
 
   renderNumber(num: FlexibleNumber): string {

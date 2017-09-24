@@ -3,21 +3,59 @@ import * as React from "react";
 import { FlexibleNumber } from "../logic/number";
 import * as render from "../logic/render";
 
+/**
+ * Props configuration for `NumberDisplay`
+ */
 export interface NumberDisplayProps {
+  /**
+   * This number is displayed
+   */
   num: FlexibleNumber;
+
+  /**
+   * If set to true, this display does not
+   * accept user input.
+   */
   disabled?: boolean;
+
+  /**
+   * Invoked when the user updates the display
+   * with a valid number.
+   */
   onChange?: (newNumber: FlexibleNumber) => void;
 }
 
+/**
+ * Current state of the number display
+ */
 export interface NumberDisplayState {
-  // used to show invalid numbers
+  /**
+   * The current text shown in the number display.
+   */
   displayText: string;
+
+  /**
+   * True if the text input has focus
+   */
   focused?: boolean;
+
+  /**
+   * True if the current text shown does not represent a valid number.
+   */
   valid: boolean;
 }
 
+/**
+ * This component displays a number, and can accept user input to update the number.
+ */
 export class NumberDisplay extends React.Component<NumberDisplayProps, NumberDisplayState> {
 
+  /**
+   * Update the display text with a new number
+   * 
+   * This is called whenever props are passed
+   * in from the calculator.
+   */
   updateNum(num: FlexibleNumber) {
     this.setState({
       displayText: render.renderNumber(num),
@@ -33,10 +71,15 @@ export class NumberDisplay extends React.Component<NumberDisplayProps, NumberDis
     this.updateNum(this.props.num);
   }
 
+  /**
+   * Handle text input from the user.
+   * 
+   * If the new value of the text input is a valid number,
+   * the `onChange` event is fired with the value of the new number.
+   * Otherwise the text input has an invalid styling applied.
+   */
   handleTextInput(evt: React.FormEvent<HTMLInputElement>) {
-    // Little hack to parse empty string as zero
     let text = evt.currentTarget.value;
-    console.log(text);
     let valid = true;
     let newNumber;
     try {
@@ -53,6 +96,13 @@ export class NumberDisplay extends React.Component<NumberDisplayProps, NumberDis
     });
   }
 
+  /**
+   * Keep track of whether or not the input has focus.
+   * 
+   * This is so that when the user clicks on an input with a single "0",
+   * it will change to being blank, and restore the "0" if the user exits
+   * focus without changing the value.
+   */
   updateFocused(focused: boolean) {
     let text = this.state.displayText;
     if (!focused && text == "") {
@@ -68,8 +118,6 @@ export class NumberDisplay extends React.Component<NumberDisplayProps, NumberDis
 
   render() {
     let result = this.state.displayText;
-    
-    // console.log("number display render - " + result);
     let className = "form-control calc-display";
     if (!this.state.valid) {
       className = className + " parsley-error";

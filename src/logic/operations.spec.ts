@@ -3,6 +3,10 @@ import { expect } from "chai";
 import { addNumbers, subtractNumbers, multiplyNumbers, shiftNumberRight, shiftNumberLeft, divideNumbers} from "./operations";
 import { parseNumber, renderNumber } from "./render";
 
+/**
+ * Convenience function to add two base 10 numbers as strings
+ * and returns the result as a string 
+ */
 function add10(num1String: string, num2String: string): string {
   const num1 = parseNumber(num1String, 10);
   const num2 = parseNumber(num2String, 10);
@@ -184,7 +188,7 @@ describe("Subtract operation", () => {
 });
 
 
-
+/** Multiply numbers */
 function mul(num1String: string, num2String: string, baseNum: number): string {
   const num1 = parseNumber(num1String, baseNum);
   const num2 = parseNumber(num2String, baseNum);
@@ -197,6 +201,7 @@ function mul10(num1String: string, num2String: string): string {
   return mul(num1String, num2String, 10);
 }
 
+/** Multiply numbers in base 2 */
 function mul2(num1String: string, num2String: string): string {
   return mul(num1String, num2String, 2);
 }
@@ -283,12 +288,14 @@ describe("Multiply operation", () => {
   });
 });
 
+/** Shift number left in base 10 */
 function lshift10(numString: string, by: number): string {
   let num = parseNumber(numString, 10);
   num = shiftNumberLeft(num, by);
   return renderNumber(num);
 }
 
+/** Shift number right in base 10 */
 function rshift10(numString: string, by: number): string {
   let num = parseNumber(numString, 10);
   num = shiftNumberRight(num, by);
@@ -317,6 +324,7 @@ describe("Shift operation", () => {
   });
 });
 
+/** Divide numbers in base 10 */
 function div10(num1String: string, num2String: string): string {
   const num1 = parseNumber(num1String, 10);
   const num2 = parseNumber(num2String, 10);

@@ -7,13 +7,8 @@ import { FlexibleNumber, newNumber } from "./number";
 import { compareNumbers, compareDigitSets } from "./compare";
 import { lookupSubtraction, lookupAddition, NumberTableEntry } from "./numbertables";
 
-// TODO: remove this. only used for debugging
-import * as render from "./render";
-
 /**
  * Adds two numbers together
- * 
- * // TODO: support negative numbers
  */
 export function addNumbers(num1: FlexibleNumber, num2: FlexibleNumber): FlexibleNumber {
   num1 = deepCopy(num1);
@@ -31,7 +26,6 @@ export function addNumbers(num1: FlexibleNumber, num2: FlexibleNumber): Flexible
   if (num1.negative != num2.negative) {
     subtract = true;
   }
-  // console.log("num1=" + num1.wholeDigits + ", num2=" + num2.wholeDigits + ", neg=" + negative + ", sub=" + subtract);
   let digits3: Array<number>;
   if (subtract) {
     // determine if the negative number is bigger in magnitude than the
@@ -73,8 +67,21 @@ export function subtractNumbers(num1: FlexibleNumber, num2: FlexibleNumber): Fle
   return addNumbers(num1, num2);
 }
 
+/**
+ * Returns the difference between two digit sets
+ * 
+ * The first digit set should be larger than or equal to the second digit set. Otherwise
+ * the behavior of this function is undefined.
+ * Digit sets should also be aligned by using zero-padding prior to this operation.
+ * Check usages in the code for examples.
+ * 
+ * @param numberBase Number base of the operands
+ * @param num1 Left operand
+ * @param num2 Right operand
+ */
 export function subtractDigitSet(numberBase: number, num1: Array<number>, num2: Array<number>): Array<number> {
   const diffs: Array<NumberTableEntry> = [];
+  // For each pair of digits, look up the result difference and add it to the list
   num1.forEach((digit1, index) => {
     const digit2 = num2[index];
     const diff = lookupSubtraction(digit1, digit2, numberBase);
@@ -86,11 +93,15 @@ export function subtractDigitSet(numberBase: number, num1: Array<number>, num2: 
 
   const result: Array<number> = [];
   let carry = 0;
+  // Convert the list of differences into a number, applying
+  // carry value from previous digit if any.
   diffs.forEach(diff => {
-    // subtract carry
+    // subtract carry from the digit if there is any
     let diff2 = lookupSubtraction(diff.result, carry, numberBase);
     let resultDigit = diff2.result;
     result.push(resultDigit);
+    // one of `diff.carry, diff2.carry` may be 1,
+    // but not both.
     carry = diff.carry + diff2.carry;
   });
   return result;
@@ -148,6 +159,11 @@ export function multiplyDigitSets(numberBase: number, num1: Array<number>, num2:
   return product;
 }
 
+/**
+ * Performs a division operation on two numbers.
+ * @param num1 Left operand
+ * @param num2 Right operand
+ */
 export function divideNumbers(num1: FlexibleNumber, num2: FlexibleNumber): FlexibleNumber {
   num1 = deepCopy(num1);
   num2 = deepCopy(num2);
@@ -186,7 +202,6 @@ export function divideNumbers(num1: FlexibleNumber, num2: FlexibleNumber): Flexi
       num1 = subtractNumbers(num1, num2);
       resultDigit++;
     }
-    // console.log("resultDigit: " + resultDigit);
     resultDigits.unshift(resultDigit);
     // console.log(`div step: digit=${resultDigit}, accum=${resultDigits}, accumSize=${resultDigits.length}, resultShift=${resultShift}, num1=${render.renderNumber(num1)}, num2=${render.renderNumber(num2)}`);
     // This means that there is no remainder, and we're done.
@@ -203,10 +218,6 @@ export function divideNumbers(num1: FlexibleNumber, num2: FlexibleNumber): Flexi
     }
   }
 
-  // addZeroPadding(num1.wholeDigits, num2.wholeDigits);
-  // addZeroPadding(num1.fractionDigits, num2.fractionDigits);
-  // const digits1 = convertToDigitSet(num1);
-  // const digits2 = convertToDigitSet(num2);
   let result = newNumber(num1.numberBase);
   // Assign digits and shift the result appropriately
   result.wholeDigits = resultDigits;

@@ -2,6 +2,12 @@ import * as React from "react";
 
 import { Calculator } from "./Calculator";
 
+/**
+ * This is the page that contains the calculator.
+ * 
+ * The purpose of this component is to provide the container
+ * layout for the calculator.
+ */
 export class CalcPage extends React.Component {
   render() {
     return <div>

@@ -3,6 +3,9 @@ import {trimZeroPadding} from "./util";
 
 const digits = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ#!";
 
+/**
+ * Creates a reverse lookup from digit string to value
+ */
 function buildReverseDigits(): {[key: string]: number} {
   const result = {};
   for (let i = 0; i < digits.length; i++) {
@@ -45,6 +48,9 @@ export function renderNumber(number: FlexibleNumber): string {
   return arr.join("");
 }
 
+/**
+ * Checks if each digit in an array is valid for the number base 
+ */
 function validateDigits(digits: Array<number>, numberBase: number) {
   for (let i = 0; i < digits.length; i++) {
     if (digits[i] < 0 || digits[i] >= numberBase) {
