@@ -118,11 +118,11 @@ describe("Number conversion", () => {
     const result = convert.convertNumber(render.parseNumber(longNumber, 10), 10);
     expect(render.renderNumber(result)).to.equal(longNumber);
   });
-});
 
-/*
-base 10   base 2    fraction
-.5        .1        1/2
-.25       .01       1/4
-.125      .001      1/8
-*/
+  it("Imprecision error: 3.111... (base 4) -> 3.3333...044212... (base 10)", () => {
+    // This is the result of 10 / 3 in base 4.
+    const longNumber = "3.111111111111111111111111111111";
+    const result = convert.convertNumber(render.parseNumber(longNumber, 4), 10);
+    expect(render.renderNumber(result)).to.equal("3.333333333333333333044212754003");
+  });
+});

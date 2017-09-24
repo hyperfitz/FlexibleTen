@@ -4,6 +4,8 @@ import { CalcButton } from "./CalcButton";
 import { NumberDisplay } from "./NumberDisplay";
 import { NumberSystemSelector } from "./NumberSystemSelector";
 import { CalculatorDetails } from "./CalculatorDetails";
+import { CalculatorButtons } from "./CalculatorButtons";
+import { ConversionModeSelector, ConversionMode } from "./ConversionModeSelector";
 
 import { FlexibleNumber } from "../logic/number";
 import * as convert from "../logic/convert";
@@ -16,9 +18,20 @@ export interface CalculatorState {
   operation?: string;
   fraction?: boolean;
   operationPending?: boolean;
+  conversionMode: ConversionMode;
   showNumberSystemSelectorA: boolean;
   showNumberSystemSelectorB: boolean;
 }
+
+// TODO: maybe move this out
+type BinaryOperation = (num1: FlexibleNumber, num2: FlexibleNumber) => FlexibleNumber;
+
+const BinaryOperations: {[key: string]: BinaryOperation} = {
+  "+": (num1, num2) => operations.addNumbers(num1, num2),
+  "-": (num1, num2) => operations.subtractNumbers(num1, num2),
+  "*": (num1, num2) => operations.multiplyNumbers(num1, num2),
+  "/": (num1, num2) => operations.divideNumbers(num1, num2),
+};
 
 export class Calculator extends React.Component<undefined, CalculatorState> {
 
@@ -69,28 +82,33 @@ export class Calculator extends React.Component<undefined, CalculatorState> {
     if (!this.state.operation) {
       return;
     }
-    let newNumber: FlexibleNumber;
-    if (this.state.operation == "+") {
-      newNumber = operations.addNumbers(this.state.operationRegister, this.state.displayRegisterA);
-
-    }
-    if (this.state.operation == "-") {
-      newNumber = operations.subtractNumbers(this.state.operationRegister, this.state.displayRegisterA);
-    }
-    if (this.state.operation == "*") {
-      newNumber = operations.multiplyNumbers(this.state.operationRegister, this.state.displayRegisterA);
-    }
-    if (this.state.operation == "/") {
-      newNumber = operations.divideNumbers(this.state.operationRegister, this.state.displayRegisterA);
+    const newNumberA = BinaryOperations[this.state.operation](this.state.operationRegister, this.state.displayRegisterA);
+    let newNumberB: FlexibleNumber;
+    switch (this.state.conversionMode) {
+      case ConversionMode.operation:
+        const leftOperand = convert.convertNumber(this.state.operationRegister, this.state.displayRegisterB.numberBase);
+        newNumberB = BinaryOperations[this.state.operation](leftOperand, this.state.displayRegisterB);
+        break;
+      case ConversionMode.mirror:
+        newNumberB = convert.convertNumber(newNumberA, this.state.displayRegisterB.numberBase);
+        break;
+      default:
+        throw new Error(`Unsupported conversion mode: ${this.state.conversionMode}`);
     }
     this.setState({
       operationRegister: null,
       operation: null,
+      displayRegisterA: newNumberA,
+      displayRegisterB: newNumberB,
     });
-    this.updateRegisterA(newNumber);
+    // this.updateRegisterA(newNumber);
   }
 
   handleOperationClick(operation: string) {
+    // TODO: fix this
+    if (operation == "=") {
+      this.handleOperation();
+    }
     this.setState({
       operationPending: true,
       operation: operation,
@@ -120,6 +138,7 @@ export class Calculator extends React.Component<undefined, CalculatorState> {
     this.setState({
       displayRegisterA: displayRegisterA,
       displayRegisterB: displayRegisterB,
+      conversionMode: ConversionMode.operation,
     });
   }
 
@@ -167,14 +186,14 @@ export class Calculator extends React.Component<undefined, CalculatorState> {
     });
   }
 
-  isValidDigit(digit: number): boolean {
-    const result = digit < this.state.displayRegisterA.numberBase;
-    // console.log(digit + ", " + this.state.displayRegisterA.numberBase + ", " + result);
-    return result;
-  }
-
   handleNumberUpdate(newNumber: FlexibleNumber) {
     this.updateRegisterA(newNumber);
+  }
+
+  handleConversionModeChange(newMode: ConversionMode) {
+    this.setState({
+      conversionMode: newMode,
+    });
   }
 
   render() {
@@ -199,6 +218,8 @@ export class Calculator extends React.Component<undefined, CalculatorState> {
           <h4 className="text-center">
             Number System: <strong style={{ cursor: "pointer" }}
               onClick={this.editNumberSystemB.bind(this)}>{this.state.displayRegisterB.numberBase}</strong>
+            &nbsp;
+              <ConversionModeSelector mode={this.state.conversionMode} onModeChange={this.handleConversionModeChange.bind(this)} />
           </h4>
           <NumberDisplay num={this.state.displayRegisterB} disabled={true} />
         </div>
@@ -211,42 +232,15 @@ export class Calculator extends React.Component<undefined, CalculatorState> {
       <CalculatorDetails operationRegister={this.state.operationRegister}
         operator={this.state.operation}
         registerA={this.state.displayRegisterA}
-        registerB={this.state.displayRegisterB}/>
-      <div className="row">
-        <CalcButton onClick={this.onClear.bind(this)}>C</CalcButton>
-        <CalcButton disabled={true}>()</CalcButton>
-        <CalcButton disabled={true} id="%" onClick={this.handleOperationClick.bind(this)}>%</CalcButton>
-        <CalcButton id="/" onClick={this.handleOperationClick.bind(this)}>/</CalcButton>
-      </div>
-      <div className="row">
-
-        <CalcButton disabled={!this.isValidDigit(7)} id="7" onClick={this.handleNumberEntry.bind(this)}>7</CalcButton>
-        <CalcButton disabled={!this.isValidDigit(8)} id="8" onClick={this.handleNumberEntry.bind(this)}>8</CalcButton>
-        <CalcButton disabled={!this.isValidDigit(9)} id="9" onClick={this.handleNumberEntry.bind(this)}>9</CalcButton>
-        <CalcButton id="*" onClick={this.handleOperationClick.bind(this)}>*</CalcButton>
-      </div>
-      {/* 7,8,9, times */}
-      <div className="row">
-        <CalcButton disabled={!this.isValidDigit(4)} id="4" onClick={this.handleNumberEntry.bind(this)}>4</CalcButton>
-        <CalcButton disabled={!this.isValidDigit(5)} id="5" onClick={this.handleNumberEntry.bind(this)}>5</CalcButton>
-        <CalcButton disabled={!this.isValidDigit(6)} id="6" onClick={this.handleNumberEntry.bind(this)}>6</CalcButton>
-        <CalcButton id="-" onClick={this.handleOperationClick.bind(this)}>-</CalcButton>
-      </div>
-      {/* 4,5,6, minus */}
-      <div className="row">
-        <CalcButton disabled={!this.isValidDigit(1)} id="1" onClick={this.handleNumberEntry.bind(this)}>1</CalcButton>
-        <CalcButton disabled={!this.isValidDigit(2)} id="2" onClick={this.handleNumberEntry.bind(this)}>2</CalcButton>
-        <CalcButton disabled={!this.isValidDigit(3)} id="3" onClick={this.handleNumberEntry.bind(this)}>3</CalcButton>
-        <CalcButton id="+" onClick={this.handleOperationClick.bind(this)}>+</CalcButton>
-      </div>
-      {/* 1,2,3, plus */}
-      <div className="row">
-        <CalcButton onClick={this.invertSign.bind(this)}>&plusmn;</CalcButton>
-        <CalcButton disabled={!this.isValidDigit(0)} id="0" onClick={this.handleNumberEntry.bind(this)}>0</CalcButton>
-        <CalcButton onClick={this.handleDecimalClick.bind(this)}>.</CalcButton>
-        <CalcButton onClick={this.handleOperation.bind(this)}>=</CalcButton>
-      </div>
-      {/* sign, 0, ., equals */}
+        registerB={this.state.displayRegisterB} />
+      <CalculatorButtons
+        numberBase={this.state.displayRegisterA.numberBase}
+        onClear={this.onClear.bind(this)}
+        onDecimalClick={this.handleDecimalClick.bind(this)}
+        onDigitEntry={this.handleNumberEntry.bind(this)}
+        onOperation={this.handleOperationClick.bind(this)}
+        onSignInvert={this.invertSign.bind(this)} />
+      {/* TODO: buttons */}
     </div>
   }
 }

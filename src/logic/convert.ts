@@ -3,6 +3,8 @@ import {addDigitSet, trimZeroPadding, addZeroPadding, MaxDecimalPlaces, deepCopy
 import * as operations from "./operations";
 import * as compare from "./compare";
 
+// import * as render from "./render";
+
 export function convertNumber(num: FlexibleNumber, toBase: number): FlexibleNumber {
   num = deepCopy(num);
   const result: FlexibleNumber = {
@@ -26,11 +28,13 @@ export function convertNumber(num: FlexibleNumber, toBase: number): FlexibleNumb
     for (let i = 0; i < num.fractionDigits.length; i++) {
       denominatorDigits.unshift(0);
     }
+    // console.log(`convert fraction: numDigits=${numeratorDigits}, denDigits=${denominatorDigits}`);
     // console.log(`denom: pre=${denominatorDigits}`);
     denominatorDigits = convertDigitSet(denominatorDigits, num.numberBase, toBase);
     // console.log(`denom: post=${denominatorDigits}`);
     const denominator = convertFromDigitSet(denominatorDigits, 0, toBase, false);
     const numerator = convertFromDigitSet(numeratorDigits, 0, toBase, false);
+    // console.log(`convert fraction: den=${render.renderNumber(numerator)}, num=${render.renderNumber(denominator)}`);
     const quotient = operations.divideNumbers(numerator, denominator);
     result.fractionDigits = quotient.fractionDigits;
   }
