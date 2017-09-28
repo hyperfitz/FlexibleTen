@@ -42,8 +42,7 @@
   "scripts": {
     "runserver": "python -m SimpleHTTPServer 4200",
     "dev": "webpack-dev-server --hot --inline",
-    "build": "webpack -w",
-    "build:prod": "webpack --config=webpack.config.prod.js",
+    "build": "webpack --config=webpack.config.prod.js",
     "test": "karma start"
   }
 }

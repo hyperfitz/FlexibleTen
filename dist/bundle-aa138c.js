@@ -1849,6 +1849,9 @@ function convertFromDigitSet(digits, decimalPlace, numberBase, negative) {
     };
 }
 exports.convertFromDigitSet = convertFromDigitSet;
+/**
+ * Checks if a `FlexibleNumber` is equal to zero.
+ */
 function isZero(number) {
     number = deepCopy(number);
     trimZeroPadding(number.wholeDigits);
@@ -4294,6 +4297,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var number_1 = __webpack_require__(83);
 var util_1 = __webpack_require__(40);
 var digits = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ#!";
+/**
+ * Creates a reverse lookup from digit string to value
+ */
 function buildReverseDigits() {
     var result = {};
     for (var i = 0; i < digits.length; i++) {
@@ -4334,6 +4340,9 @@ function renderNumber(number) {
     return arr.join("");
 }
 exports.renderNumber = renderNumber;
+/**
+ * Checks if each digit in an array is valid for the number base
+ */
 function validateDigits(digits, numberBase) {
     for (var i = 0; i < digits.length; i++) {
         if (digits[i] < 0 || digits[i] >= numberBase) {
@@ -4342,7 +4351,8 @@ function validateDigits(digits, numberBase) {
     }
 }
 /** Parses a number string representation into a `FlexibleNumber` */
-function parseNumber(numberStr, numberBase) {
+function parseNumber(numberStr, numberBase, trimZeros) {
+    if (trimZeros === void 0) { trimZeros = true; }
     var negative = numberStr.indexOf("-") == 0;
     if (negative) {
         numberStr = numberStr.substring(1);
@@ -4364,8 +4374,10 @@ function parseNumber(numberStr, numberBase) {
     validateDigits(num.fractionDigits, numberBase);
     // re-order so that least significant digit comes first
     num.wholeDigits.reverse();
-    util_1.trimZeroPadding(num.wholeDigits);
-    util_1.trimZeroPadding(num.fractionDigits);
+    if (trimZeros) {
+        util_1.trimZeroPadding(num.wholeDigits);
+        util_1.trimZeroPadding(num.fractionDigits);
+    }
     num.negative = negative;
     return num;
 }
@@ -4431,6 +4443,9 @@ function generateNumberTables(operation) {
     }
     return tables;
 }
+/**
+ * Generates tables to look up digit addition results in each number base.
+ */
 function generateAdditionTables() {
     return generateNumberTables(function (num1, num2, base) {
         var result = (num1 + num2) % base;
@@ -4442,6 +4457,9 @@ function generateAdditionTables() {
     });
 }
 var AdditionTables = generateAdditionTables();
+/**
+ * Generates tables to look up digit subtraction results in each number base.
+ */
 function generateSubtractionTables() {
     return generateNumberTables(function (num1, num2, base) {
         var result = num1 - num2;
@@ -4456,10 +4474,24 @@ function generateSubtractionTables() {
     });
 }
 var SubtractionTables = generateSubtractionTables();
+/**
+ * Looks up the result of a digit addition for the specified number base.
+ *
+ * @param num1 Left operand
+ * @param num2 Right operand
+ * @param base Number base of each digit of the operation
+ */
 function lookupAddition(num1, num2, base) {
     return AdditionTables[base][num1][num2];
 }
 exports.lookupAddition = lookupAddition;
+/**
+ * Looks up the result of a digit subtraction for the specified number base.
+ *
+ * @param num1 Left operand
+ * @param num2 Right operand
+ * @param base Number base of each digit of the operation
+ */
 function lookupSubtraction(num1, num2, base) {
     return SubtractionTables[base][num1][num2];
 }
@@ -8703,8 +8735,6 @@ var compare_1 = __webpack_require__(134);
 var numbertables_1 = __webpack_require__(84);
 /**
  * Adds two numbers together
- *
- * // TODO: support negative numbers
  */
 function addNumbers(num1, num2) {
     num1 = util_1.deepCopy(num1);
@@ -8721,7 +8751,6 @@ function addNumbers(num1, num2) {
     if (num1.negative != num2.negative) {
         subtract = true;
     }
-    // console.log("num1=" + num1.wholeDigits + ", num2=" + num2.wholeDigits + ", neg=" + negative + ", sub=" + subtract);
     var digits3;
     if (subtract) {
         // determine if the negative number is bigger in magnitude than the
@@ -8763,8 +8792,21 @@ function subtractNumbers(num1, num2) {
     return addNumbers(num1, num2);
 }
 exports.subtractNumbers = subtractNumbers;
+/**
+ * Returns the difference between two digit sets
+ *
+ * The first digit set should be larger than or equal to the second digit set. Otherwise
+ * the behavior of this function is undefined.
+ * Digit sets should also be aligned by using zero-padding prior to this operation.
+ * Check usages in the code for examples.
+ *
+ * @param numberBase Number base of the operands
+ * @param num1 Left operand
+ * @param num2 Right operand
+ */
 function subtractDigitSet(numberBase, num1, num2) {
     var diffs = [];
+    // For each pair of digits, look up the result difference and add it to the list
     num1.forEach(function (digit1, index) {
         var digit2 = num2[index];
         var diff = numbertables_1.lookupSubtraction(digit1, digit2, numberBase);
@@ -8775,11 +8817,15 @@ function subtractDigitSet(numberBase, num1, num2) {
     });
     var result = [];
     var carry = 0;
+    // Convert the list of differences into a number, applying
+    // carry value from previous digit if any.
     diffs.forEach(function (diff) {
-        // subtract carry
+        // subtract carry from the digit if there is any
         var diff2 = numbertables_1.lookupSubtraction(diff.result, carry, numberBase);
         var resultDigit = diff2.result;
         result.push(resultDigit);
+        // one of `diff.carry, diff2.carry` may be 1,
+        // but not both.
         carry = diff.carry + diff2.carry;
     });
     return result;
@@ -8835,6 +8881,11 @@ function multiplyDigitSets(numberBase, num1, num2) {
     return product;
 }
 exports.multiplyDigitSets = multiplyDigitSets;
+/**
+ * Performs a division operation on two numbers.
+ * @param num1 Left operand
+ * @param num2 Right operand
+ */
 function divideNumbers(num1, num2) {
     num1 = util_1.deepCopy(num1);
     num2 = util_1.deepCopy(num2);
@@ -8872,7 +8923,6 @@ function divideNumbers(num1, num2) {
             num1 = subtractNumbers(num1, num2);
             resultDigit++;
         }
-        // console.log("resultDigit: " + resultDigit);
         resultDigits.unshift(resultDigit);
         // console.log(`div step: digit=${resultDigit}, accum=${resultDigits}, accumSize=${resultDigits.length}, resultShift=${resultShift}, num1=${render.renderNumber(num1)}, num2=${render.renderNumber(num2)}`);
         // This means that there is no remainder, and we're done.
@@ -8887,10 +8937,6 @@ function divideNumbers(num1, num2) {
             resultShift++;
         }
     }
-    // addZeroPadding(num1.wholeDigits, num2.wholeDigits);
-    // addZeroPadding(num1.fractionDigits, num2.fractionDigits);
-    // const digits1 = convertToDigitSet(num1);
-    // const digits2 = convertToDigitSet(num2);
     var result = number_1.newNumber(num1.numberBase);
     // Assign digits and shift the result appropriately
     result.wholeDigits = resultDigits;
@@ -9083,16 +9129,21 @@ var __extends = (this && this.__extends) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 var React = __webpack_require__(0);
+// Maybe someday use multi-page support
+// import { Route, BrowserRouter } from "react-router-dom";
+// import { createBrowserHistory } from "history";
 var CalcPage_1 = __webpack_require__(138);
-// 'HelloProps' describes the shape of props.
-// State is never set so we use the 'undefined' type.
+/**
+ * This is the wrapper application element. If this application
+ * ever needs to support multiple pages, that
+ * multi-page support would be configured here.
+ * Currently only the calculator page is rendered.
+ */
 var App = (function (_super) {
     __extends(App, _super);
     function App() {
         return _super !== null && _super.apply(this, arguments) || this;
     }
-    App.prototype.componentWillMount = function () {
-    };
     App.prototype.render = function () {
         return React.createElement("div", { className: "cl-mcont" },
             React.createElement(CalcPage_1.CalcPage, null));
@@ -9121,6 +9172,12 @@ var __extends = (this && this.__extends) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 var React = __webpack_require__(0);
 var Calculator_1 = __webpack_require__(139);
+/**
+ * This is the page that contains the calculator.
+ *
+ * The purpose of this component is to provide the container
+ * layout for the calculator.
+ */
 var CalcPage = (function (_super) {
     __extends(CalcPage, _super);
     function CalcPage() {
@@ -9169,24 +9226,44 @@ var CalculatorButtons_1 = __webpack_require__(283);
 var ConversionModeSelector_1 = __webpack_require__(285);
 var convert = __webpack_require__(286);
 var operations = __webpack_require__(133);
+/**
+ * Mapping of operator string to math function.
+ */
 var BinaryOperations = {
     "+": function (num1, num2) { return operations.addNumbers(num1, num2); },
     "-": function (num1, num2) { return operations.subtractNumbers(num1, num2); },
     "*": function (num1, num2) { return operations.multiplyNumbers(num1, num2); },
     "/": function (num1, num2) { return operations.divideNumbers(num1, num2); },
 };
+/**
+ * The top-level user interface for the calculator.
+ *
+ * Accepts no props and maintains its own state.
+ */
 var Calculator = (function (_super) {
     __extends(Calculator, _super);
     function Calculator() {
         return _super !== null && _super.apply(this, arguments) || this;
     }
+    /**
+     * Update the top display with a number and automatically
+     * convert it to the bottom display.
+     */
     Calculator.prototype.updateRegisterA = function (num) {
+        // console.log("updateRegisterA: " + JSON.stringify(num));
         var numb = convert.convertNumber(num, this.state.displayRegisterB.numberBase);
+        // console.log("after conversion: " + JSON.stringify(numb));
         this.setState({
+            fraction: num.fractionDigits.length > 0,
             displayRegisterA: num,
             displayRegisterB: numb,
         });
     };
+    /**
+     * Clears the state of the calculator.
+     *
+     * Invoked when the user clicks on the `C` button
+     */
     Calculator.prototype.onClear = function () {
         this.setState({
             fraction: false,
@@ -9199,7 +9276,16 @@ var Calculator = (function (_super) {
         reg.negative = false;
         this.updateRegisterA(reg);
     };
-    Calculator.prototype.handleNumberEntry = function (id) {
+    /**
+     * Enters new digits as would be expected from a normal calculator.
+     *
+     * Invoked whenever a user clicks on a number button.
+     *
+     * If an operation is pending, the current display value is stored
+     * in `operationRegister` and a new number is created to store
+     * further digit inputs.
+     */
+    Calculator.prototype.handleNumberEntry = function (digit) {
         // console.log("calc click - " + id);
         if (this.state.operationPending) {
             var operationRegister = JSON.parse(JSON.stringify(this.state.displayRegisterA));
@@ -9211,8 +9297,10 @@ var Calculator = (function (_super) {
                 operationPending: false,
             });
         }
-        var num = parseInt(id);
+        var num = parseInt(digit);
         var reg = this.state.displayRegisterA;
+        // If the user has clicked on `.` start pushing
+        // input to the fractional component of the number instead.
         if (this.state.fraction) {
             reg.fractionDigits.push(num);
         }
@@ -9221,11 +9309,21 @@ var Calculator = (function (_super) {
         }
         this.updateRegisterA(reg);
     };
+    /**
+     * Performs the pending operation.
+     *
+     * Invoked when the user clicks on the `=` button.
+     *
+     * Depending on the conversion mode, the operation
+     * may or may not be performed separately for both displays.
+     */
     Calculator.prototype.handleOperation = function () {
         if (!this.state.operation) {
             return;
         }
         var newNumberA = BinaryOperations[this.state.operation](this.state.operationRegister, this.state.displayRegisterA);
+        // Depending on the conversion mode, either copy the new number
+        // to the second display, or perform the operation separately on converted operands.
         var newNumberB;
         switch (this.state.conversionMode) {
             case ConversionModeSelector_1.ConversionMode.operation:
@@ -9244,10 +9342,17 @@ var Calculator = (function (_super) {
             displayRegisterA: newNumberA,
             displayRegisterB: newNumberB,
         });
-        // this.updateRegisterA(newNumber);
     };
+    /**
+     * Invoked when the user clicks an operation button.
+     *
+     * If `=` button is clicked, it causes any pending operation to execute.
+     * If any other operation button is clicked, a pending operation
+     * is set.
+     *
+     * The `fraction` flag that is caused by clicking on `.` is also cleared.
+     */
     Calculator.prototype.handleOperationClick = function (operation) {
-        // TODO: fix this
         if (operation == "=") {
             this.handleOperation();
         }
@@ -9257,11 +9362,19 @@ var Calculator = (function (_super) {
             fraction: false,
         });
     };
+    /**
+     * Sets the `fraction` flag.
+     *
+     * Invoked when the user clicks on the `.` button.
+     */
     Calculator.prototype.handleDecimalClick = function () {
         this.setState({
             fraction: true
         });
     };
+    /**
+     * Set the initial state of the calculator.
+     */
     Calculator.prototype.componentWillMount = function () {
         var displayRegisterA = {
             negative: false,
@@ -9281,34 +9394,65 @@ var Calculator = (function (_super) {
             conversionMode: ConversionModeSelector_1.ConversionMode.operation,
         });
     };
+    /**
+     * Invoked when a user cancels the number selection dialog
+     * for either display.
+     */
     Calculator.prototype.cancelUpdateNumberSystem = function () {
         this.setState({
             showNumberSystemSelectorA: false,
             showNumberSystemSelectorB: false,
         });
     };
+    /**
+     * Launch the number system selection dialog for the top display.
+     *
+     * Invoked when the user clicks on the top display number system.
+     */
     Calculator.prototype.editNumberSystemA = function () {
         this.setState({
             showNumberSystemSelectorA: true,
         });
     };
+    /**
+     * Launch the number system selection dialog for the bottom display.
+     *
+     * Invoked when the user clicks on the bottom display number system.
+     */
     Calculator.prototype.editNumberSystemB = function () {
         this.setState({
             showNumberSystemSelectorB: true,
         });
     };
+    /**
+     * Update the number system for the top display.
+     *
+     * Invoked when the user clicks on any number system in the
+     * selection dialog for the top display.
+     */
     Calculator.prototype.updateNumberSystemA = function (numberSystem) {
         this.setState({
+            displayRegisterA: convert.convertNumber(this.state.displayRegisterA, numberSystem),
             showNumberSystemSelectorA: false,
         });
-        this.updateRegisterA(convert.convertNumber(this.state.displayRegisterA, numberSystem));
     };
+    /**
+     * Update the number system for the bottom display.
+     *
+     * Invoked when the user clicks on any number system in the
+     * selection dialog for the bottom display.
+     */
     Calculator.prototype.updateNumberSystemB = function (numberSystem) {
         this.setState({
             displayRegisterB: convert.convertNumber(this.state.displayRegisterA, numberSystem),
             showNumberSystemSelectorB: false,
         });
     };
+    /**
+     * Inverts the sign of both displays.
+     *
+     * Invoked when a user clicks on the `+/-` button.
+     */
     Calculator.prototype.invertSign = function () {
         var regA = this.state.displayRegisterA;
         var regB = this.state.displayRegisterB;
@@ -9319,16 +9463,27 @@ var Calculator = (function (_super) {
             displayRegisterB: regB
         });
     };
+    /**
+     * Updates both displays with the new number.
+     *
+     * This is invoked when the user manually enters a valid
+     * number into the top display with a keyboard.
+     */
     Calculator.prototype.handleNumberUpdate = function (newNumber) {
         this.updateRegisterA(newNumber);
     };
+    /**
+     * Changes the conversion mode.
+     *
+     * Invoked when a user clicks on the conversion mode icon.
+     */
     Calculator.prototype.handleConversionModeChange = function (newMode) {
         this.setState({
             conversionMode: newMode,
         });
     };
     Calculator.prototype.render = function () {
-        console.log("rendering");
+        console.log("rendering calculator");
         return React.createElement("div", { className: "block-flat calculator" },
             React.createElement("div", { className: "row" },
                 React.createElement("div", { className: "col-lg-12 col-md-12" },
@@ -9373,11 +9528,20 @@ var __extends = (this && this.__extends) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 var React = __webpack_require__(0);
 var render = __webpack_require__(82);
+/**
+ * This component displays a number, and can accept user input to update the number.
+ */
 var NumberDisplay = (function (_super) {
     __extends(NumberDisplay, _super);
     function NumberDisplay() {
         return _super !== null && _super.apply(this, arguments) || this;
     }
+    /**
+     * Update the display text with a new number
+     *
+     * This is called whenever props are passed
+     * in from the calculator.
+     */
     NumberDisplay.prototype.updateNum = function (num) {
         this.setState({
             displayText: render.renderNumber(num),
@@ -9390,14 +9554,19 @@ var NumberDisplay = (function (_super) {
     NumberDisplay.prototype.componentWillMount = function () {
         this.updateNum(this.props.num);
     };
+    /**
+     * Handle text input from the user.
+     *
+     * If the new value of the text input is a valid number,
+     * the `onChange` event is fired with the value of the new number.
+     * Otherwise the text input has an invalid styling applied.
+     */
     NumberDisplay.prototype.handleTextInput = function (evt) {
-        // Little hack to parse empty string as zero
         var text = evt.currentTarget.value;
-        console.log(text);
         var valid = true;
         var newNumber;
         try {
-            newNumber = render.parseNumber(text, this.props.num.numberBase);
+            newNumber = render.parseNumber(text, this.props.num.numberBase, false);
             if (this.props.onChange) {
                 this.props.onChange(newNumber);
             }
@@ -9410,6 +9579,13 @@ var NumberDisplay = (function (_super) {
             valid: valid,
         });
     };
+    /**
+     * Keep track of whether or not the input has focus.
+     *
+     * This is so that when the user clicks on an input with a single "0",
+     * it will change to being blank, and restore the "0" if the user exits
+     * focus without changing the value.
+     */
     NumberDisplay.prototype.updateFocused = function (focused) {
         var text = this.state.displayText;
         if (!focused && text == "") {
@@ -9425,8 +9601,8 @@ var NumberDisplay = (function (_super) {
     };
     NumberDisplay.prototype.render = function () {
         var _this = this;
+        console.log("rendering display");
         var result = this.state.displayText;
-        // console.log("number display render - " + result);
         var className = "form-control calc-display";
         if (!this.state.valid) {
             className = className + " parsley-error";
@@ -9457,14 +9633,21 @@ var __extends = (this && this.__extends) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 var React = __webpack_require__(0);
 var RB = __webpack_require__(85);
+/**
+ * Pop-up dialog that allows the user to select a number system.
+ */
 var NumberSystemSelector = (function (_super) {
     __extends(NumberSystemSelector, _super);
     function NumberSystemSelector() {
         return _super !== null && _super.apply(this, arguments) || this;
     }
+    // Notify the parent component that the selection was canceled.
     NumberSystemSelector.prototype.handleModalHide = function () {
         this.props.onCancel();
     };
+    /**
+     * Render a row of number system buttons
+     */
     NumberSystemSelector.prototype.renderButtons = function (start, end) {
         var _this = this;
         var numberSystems = [];
@@ -9488,6 +9671,12 @@ var NumberSystemSelector = (function (_super) {
     return NumberSystemSelector;
 }(React.Component));
 exports.NumberSystemSelector = NumberSystemSelector;
+/**
+ * An individual button in the `NumberSystemSelector`.
+ *
+ * When one of these buttons is clicked, the parent component is notified
+ * that a number system has been selected.
+ */
 var NumberSystemButton = (function (_super) {
     __extends(NumberSystemButton, _super);
     function NumberSystemButton() {
@@ -21185,6 +21374,9 @@ var __extends = (this && this.__extends) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 var React = __webpack_require__(0);
 var render = __webpack_require__(82);
+/**
+ * Shows details about the current state of the calculator.
+ */
 var CalculatorDetails = (function (_super) {
     __extends(CalculatorDetails, _super);
     function CalculatorDetails() {
@@ -21246,14 +21438,19 @@ var __extends = (this && this.__extends) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 var React = __webpack_require__(0);
 var CalcButton_1 = __webpack_require__(284);
+/**
+ * This component encapsulates the button layout of the calculator.
+ */
 var CalculatorButtons = (function (_super) {
     __extends(CalculatorButtons, _super);
     function CalculatorButtons() {
         return _super !== null && _super.apply(this, arguments) || this;
     }
+    /**
+     * Ensures that the digit is supported by the currently selected number system.
+     */
     CalculatorButtons.prototype.isValidDigit = function (digit) {
         var result = digit < this.props.numberBase;
-        // console.log(digit + ", " + this.state.displayRegisterA.numberBase + ", " + result);
         return result;
     };
     CalculatorButtons.prototype.render = function () {
@@ -21307,11 +21504,19 @@ var __extends = (this && this.__extends) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 var React = __webpack_require__(0);
+/**
+ * Simple styled button that is 25% width in
+ * a row of calculator buttons.
+ */
 var CalcButton = (function (_super) {
     __extends(CalcButton, _super);
     function CalcButton() {
         return _super !== null && _super.apply(this, arguments) || this;
     }
+    /**
+     * Emit a more useful click event
+     * that has the id of the button.
+     */
     CalcButton.prototype.handleClick = function () {
         // console.log("click! - " + this.props.id);
         if (this.props.onClick) {
@@ -21346,16 +21551,31 @@ var __extends = (this && this.__extends) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 var React = __webpack_require__(0);
 var RB = __webpack_require__(85);
+/**
+ * Indicates the mode of conversion between two different number displays.
+ */
 var ConversionMode;
 (function (ConversionMode) {
+    /**
+     * The secondary display always mirrors the result of the primary display.
+     */
     ConversionMode[ConversionMode["mirror"] = 0] = "mirror";
+    /**
+     * The secondary display result is calculated independently of the primary display.
+     */
     ConversionMode[ConversionMode["operation"] = 1] = "operation";
 })(ConversionMode = exports.ConversionMode || (exports.ConversionMode = {}));
+/**
+ * This component allows the user to switch between different conversion modes.
+ */
 var ConversionModeSelector = (function (_super) {
     __extends(ConversionModeSelector, _super);
     function ConversionModeSelector() {
         return _super !== null && _super.apply(this, arguments) || this;
     }
+    /**
+     * Toggles conversion mode
+     */
     ConversionModeSelector.prototype.handleClick = function () {
         // switch modes
         var newMode = this.props.mode == ConversionMode.mirror ? ConversionMode.operation : ConversionMode.mirror;
@@ -21393,13 +21613,22 @@ var util_1 = __webpack_require__(40);
 var operations = __webpack_require__(133);
 var compare = __webpack_require__(134);
 // import * as render from "./render";
+/**
+ * Converts a `FlexibleNumber` from one number system to another.
+ *
+ * @param num `FlexibleNumber` to convert
+ * @param toBase The target number system the number should be converted to.
+ */
 function convertNumber(num, toBase) {
     num = util_1.deepCopy(num);
+    util_1.trimZeroPadding(num.wholeDigits);
+    util_1.trimZeroPadding(num.fractionDigits);
     var result = {
         wholeDigits: [],
         fractionDigits: [],
         numberBase: toBase,
     };
+    // Convert the whole digits first
     if (num.wholeDigits.length) {
         result.wholeDigits = convertDigitSet(num.wholeDigits, num.numberBase, toBase);
     }
@@ -21416,13 +21645,9 @@ function convertNumber(num, toBase) {
         for (var i = 0; i < num.fractionDigits.length; i++) {
             denominatorDigits.unshift(0);
         }
-        // console.log(`convert fraction: numDigits=${numeratorDigits}, denDigits=${denominatorDigits}`);
-        // console.log(`denom: pre=${denominatorDigits}`);
         denominatorDigits = convertDigitSet(denominatorDigits, num.numberBase, toBase);
-        // console.log(`denom: post=${denominatorDigits}`);
         var denominator = util_1.convertFromDigitSet(denominatorDigits, 0, toBase, false);
         var numerator = util_1.convertFromDigitSet(numeratorDigits, 0, toBase, false);
-        // console.log(`convert fraction: den=${render.renderNumber(numerator)}, num=${render.renderNumber(denominator)}`);
         var quotient = operations.divideNumbers(numerator, denominator);
         result.fractionDigits = quotient.fractionDigits;
     }
@@ -21430,6 +21655,13 @@ function convertNumber(num, toBase) {
     return result;
 }
 exports.convertNumber = convertNumber;
+/**
+ * Converts a set of digits from one number system to another.
+ *
+ * @param digits Digits to convert
+ * @param srcBase The number system of the digits
+ * @param destBase The target number system
+ */
 function convertDigitSet(digits, srcBase, destBase) {
     // get a representation of the destination base in the source number system
     var destBaseInSrc = getBaseRepresentation(destBase, srcBase);
@@ -21455,9 +21687,20 @@ function convertDigitSet(digits, srcBase, destBase) {
         }
         destDigits.unshift(destDigit);
     }
-    // console.log(`digits=${digits}, destDigits=${destDigits}, destBaseInSrc=${destBaseInSrc}, srcBase=${srcBase}, destBase=${destBase}`);
     return destDigits;
 }
+/**
+ * Gets a representation of a number base in a different number system
+ *
+ * Base `2` would be represented in base `[0,1]` ("10") as `2`, but
+ * base `10` would be represented in base `2` as `[0,1,0,1]` ("1010").
+ *
+ * In theory these could be pre-calculated but for now they are not.
+ *
+ * @param src Number base to convert
+ * @param toBase Target number system
+ * @param result Optional parameter used by recursive call to keep track of the result.
+ */
 function getBaseRepresentation(src, toBase, result) {
     if (result === void 0) { result = null; }
     // console.log("convert: num=" + src);
@@ -21488,4 +21731,4 @@ module.exports = __webpack_require__.p + "img/logo.png";
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=bundle-2d623f.js.map
+//# sourceMappingURL=bundle-aa138c.js.map
