@@ -83,7 +83,7 @@ export class NumberDisplay extends React.Component<NumberDisplayProps, NumberDis
     let valid = true;
     let newNumber;
     try {
-      newNumber = render.parseNumber(text, this.props.num.numberBase);
+      newNumber = render.parseNumber(text, this.props.num.numberBase, false);
       if (this.props.onChange) {
         this.props.onChange(newNumber);
       }
@@ -117,6 +117,7 @@ export class NumberDisplay extends React.Component<NumberDisplayProps, NumberDis
   }
 
   render() {
+    console.log("rendering display");
     let result = this.state.displayText;
     let className = "form-control calc-display";
     if (!this.state.valid) {

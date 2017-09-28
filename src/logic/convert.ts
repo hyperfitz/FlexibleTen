@@ -13,6 +13,8 @@ import * as compare from "./compare";
  */
 export function convertNumber(num: FlexibleNumber, toBase: number): FlexibleNumber {
   num = deepCopy(num);
+  trimZeroPadding(num.wholeDigits);
+  trimZeroPadding(num.fractionDigits);
   const result: FlexibleNumber = {
     wholeDigits: [],
     fractionDigits: [],

@@ -89,8 +89,11 @@ export class Calculator extends React.Component<undefined, CalculatorState> {
    * convert it to the bottom display.
    */
   private updateRegisterA(num: FlexibleNumber) {
+    // console.log("updateRegisterA: " + JSON.stringify(num));
     const numb = convert.convertNumber(num, this.state.displayRegisterB.numberBase);
+    // console.log("after conversion: " + JSON.stringify(numb));
     this.setState({
+      fraction: num.fractionDigits.length > 0,
       displayRegisterA: num,
       displayRegisterB: numb,
     });
@@ -333,7 +336,7 @@ export class Calculator extends React.Component<undefined, CalculatorState> {
   }
 
   render() {
-    console.log("rendering");
+    console.log("rendering calculator");
     return <div className="block-flat calculator">
       <div className="row">
         <div className="col-lg-12 col-md-12">

@@ -1,12 +1,12 @@
-import {FlexibleNumber, newNumber} from "./number";
-import {trimZeroPadding} from "./util";
+import { FlexibleNumber, newNumber } from "./number";
+import { trimZeroPadding } from "./util";
 
 const digits = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ#!";
 
 /**
  * Creates a reverse lookup from digit string to value
  */
-function buildReverseDigits(): {[key: string]: number} {
+function buildReverseDigits(): { [key: string]: number } {
   const result = {};
   for (let i = 0; i < digits.length; i++) {
     const c = digits[i];
@@ -38,7 +38,7 @@ export function renderNumber(number: FlexibleNumber): string {
     arr.push("-");
   }
   arr.reverse();
-  
+
   if (number.fractionDigits.length) {
     arr.push(".");
     number.fractionDigits.forEach(digit => {
@@ -60,7 +60,7 @@ function validateDigits(digits: Array<number>, numberBase: number) {
 }
 
 /** Parses a number string representation into a `FlexibleNumber` */
-export function parseNumber(numberStr: string, numberBase: number): FlexibleNumber {
+export function parseNumber(numberStr: string, numberBase: number, trimZeros: boolean = true): FlexibleNumber {
   const negative = numberStr.indexOf("-") == 0;
   if (negative) {
     numberStr = numberStr.substring(1);
@@ -81,9 +81,11 @@ export function parseNumber(numberStr: string, numberBase: number): FlexibleNumb
   validateDigits(num.fractionDigits, numberBase);
   // re-order so that least significant digit comes first
   num.wholeDigits.reverse();
-  trimZeroPadding(num.wholeDigits);
-  trimZeroPadding(num.fractionDigits);
-  num.negative = negative;  
+  if (trimZeros) {
+    trimZeroPadding(num.wholeDigits);
+    trimZeroPadding(num.fractionDigits);
+  }
+  num.negative = negative;
   return num;
 }
 
