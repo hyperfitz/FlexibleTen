@@ -19,6 +19,12 @@ export interface NumberDisplayProps {
   disabled?: boolean;
 
   /**
+   * Indicates that new number entry should wipe out previous entry
+   * on focus.
+   */
+  operationPending?: boolean;
+
+  /**
    * Invoked when the user updates the display
    * with a valid number.
    */
@@ -33,6 +39,13 @@ export interface NumberDisplayState {
    * The current text shown in the number display.
    */
   displayText: string;
+
+  /**
+   * When an operation is pending and the display gains focus,
+   * the current text is displayed here where it can be restored
+   * later if a new value wasn't entered.
+   */
+  tmpText: string;
 
   /**
    * True if the text input has focus
@@ -106,11 +119,17 @@ export class NumberDisplay extends React.Component<NumberDisplayProps, NumberDis
   updateFocused(focused: boolean) {
     let text = this.state.displayText;
     if (!focused && text == "") {
-      text = "0";
-    } else if (focused && text == "0") {
+      if (this.props.operationPending) {
+        text = this.state.tmpText;
+      } else {
+        text = "0";
+      }
+    } else if (focused && (text == "0" || this.props.operationPending)) {
       text = "";
     }
+
     this.setState({
+      tmpText: this.state.displayText,
       focused: focused,
       displayText: text,
     });

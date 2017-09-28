@@ -117,6 +117,17 @@ export class Calculator extends React.Component<undefined, CalculatorState> {
     this.updateRegisterA(reg);
   }
 
+  private setLeftOperand() {
+    const operationRegister = JSON.parse(JSON.stringify(this.state.displayRegisterA));
+    this.state.displayRegisterA.fractionDigits = [];
+    this.state.displayRegisterA.wholeDigits = [];
+    this.state.displayRegisterA.negative = false;
+    this.setState({
+      operationRegister: operationRegister,
+      operationPending: false,
+    });
+  }
+
   /**
    * Enters new digits as would be expected from a normal calculator.
    * 
@@ -129,14 +140,7 @@ export class Calculator extends React.Component<undefined, CalculatorState> {
   handleNumberEntry(digit: string) {
     // console.log("calc click - " + id);
     if (this.state.operationPending) {
-      const operationRegister = JSON.parse(JSON.stringify(this.state.displayRegisterA));
-      this.state.displayRegisterA.fractionDigits = [];
-      this.state.displayRegisterA.wholeDigits = [];
-      this.state.displayRegisterA.negative = false;
-      this.setState({
-        operationRegister: operationRegister,
-        operationPending: false,
-      });
+      this.setLeftOperand();
     }
     const num = parseInt(digit);
     const reg = this.state.displayRegisterA;
@@ -321,6 +325,9 @@ export class Calculator extends React.Component<undefined, CalculatorState> {
    * number into the top display with a keyboard.
    */
   handleNumberUpdate(newNumber: FlexibleNumber) {
+    if (this.state.operationPending) {
+      this.setLeftOperand();
+    }
     this.updateRegisterA(newNumber);
   }
 
@@ -344,7 +351,7 @@ export class Calculator extends React.Component<undefined, CalculatorState> {
             Number System: <strong style={{ cursor: "pointer" }}
               onClick={this.editNumberSystemA.bind(this)}>{this.state.displayRegisterA.numberBase}</strong>
           </h4>
-          <NumberDisplay num={this.state.displayRegisterA} onChange={this.handleNumberUpdate.bind(this)} />
+          <NumberDisplay operationPending={this.state.operationPending} num={this.state.displayRegisterA} onChange={this.handleNumberUpdate.bind(this)} />
         </div>
       </div>
       <NumberSystemSelector

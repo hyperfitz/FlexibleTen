@@ -9276,6 +9276,16 @@ var Calculator = (function (_super) {
         reg.negative = false;
         this.updateRegisterA(reg);
     };
+    Calculator.prototype.setLeftOperand = function () {
+        var operationRegister = JSON.parse(JSON.stringify(this.state.displayRegisterA));
+        this.state.displayRegisterA.fractionDigits = [];
+        this.state.displayRegisterA.wholeDigits = [];
+        this.state.displayRegisterA.negative = false;
+        this.setState({
+            operationRegister: operationRegister,
+            operationPending: false,
+        });
+    };
     /**
      * Enters new digits as would be expected from a normal calculator.
      *
@@ -9288,14 +9298,7 @@ var Calculator = (function (_super) {
     Calculator.prototype.handleNumberEntry = function (digit) {
         // console.log("calc click - " + id);
         if (this.state.operationPending) {
-            var operationRegister = JSON.parse(JSON.stringify(this.state.displayRegisterA));
-            this.state.displayRegisterA.fractionDigits = [];
-            this.state.displayRegisterA.wholeDigits = [];
-            this.state.displayRegisterA.negative = false;
-            this.setState({
-                operationRegister: operationRegister,
-                operationPending: false,
-            });
+            this.setLeftOperand();
         }
         var num = parseInt(digit);
         var reg = this.state.displayRegisterA;
@@ -9470,6 +9473,9 @@ var Calculator = (function (_super) {
      * number into the top display with a keyboard.
      */
     Calculator.prototype.handleNumberUpdate = function (newNumber) {
+        if (this.state.operationPending) {
+            this.setLeftOperand();
+        }
         this.updateRegisterA(newNumber);
     };
     /**
@@ -9490,7 +9496,7 @@ var Calculator = (function (_super) {
                     React.createElement("h4", { className: "text-center" },
                         "Number System: ",
                         React.createElement("strong", { style: { cursor: "pointer" }, onClick: this.editNumberSystemA.bind(this) }, this.state.displayRegisterA.numberBase)),
-                    React.createElement(NumberDisplay_1.NumberDisplay, { num: this.state.displayRegisterA, onChange: this.handleNumberUpdate.bind(this) }))),
+                    React.createElement(NumberDisplay_1.NumberDisplay, { operationPending: this.state.operationPending, num: this.state.displayRegisterA, onChange: this.handleNumberUpdate.bind(this) }))),
             React.createElement(NumberSystemSelector_1.NumberSystemSelector, { visible: this.state.showNumberSystemSelectorA, numberSystem: this.state.displayRegisterA.numberBase, onSelectNumberSystem: this.updateNumberSystemA.bind(this), onCancel: this.cancelUpdateNumberSystem.bind(this) }),
             React.createElement("div", { className: "row" },
                 React.createElement("div", { className: "col-lg-12 col-md-12" },
@@ -9589,12 +9595,18 @@ var NumberDisplay = (function (_super) {
     NumberDisplay.prototype.updateFocused = function (focused) {
         var text = this.state.displayText;
         if (!focused && text == "") {
-            text = "0";
+            if (this.props.operationPending) {
+                text = this.state.tmpText;
+            }
+            else {
+                text = "0";
+            }
         }
-        else if (focused && text == "0") {
+        else if (focused && (text == "0" || this.props.operationPending)) {
             text = "";
         }
         this.setState({
+            tmpText: this.state.displayText,
             focused: focused,
             displayText: text,
         });
@@ -21731,4 +21743,4 @@ module.exports = __webpack_require__.p + "img/logo.png";
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=bundle-aa138c.js.map
+//# sourceMappingURL=bundle-a87adf.js.map
