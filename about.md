@@ -16,7 +16,7 @@ Any of these terms can be defined as any quantity and their logical behavior rem
 
      a = 10, b = 5, c = 2   vs.   a = 5, b = 2, c = 10
 	 
-Changing the quantitative value of the variables has no effect on their logical behavior in the math; the expressions stay the same. "a" defined as 10 behaves identically in logic to "a" defined as 5. Again, this is an elementary fact of mathematics, but it logically follows that any apparent difference in logical behavior between two different quantities through the same functions is, in fact, not logical but instead notational. Flexible Ten Mathematics points out that the fact that any variable can be given any quantity value applies to the number line as well. We can define any number line we wish of arbitrary length with digits defined as any quantity of equal magnitude increase and mathematical logic will not change when applying that number line to calculations; quantifications will remain accurate so long as we stick to the defined number line when doing our calculations. Further, what ever point we designate as the repetition point on that number line will behave notationally as 10.
+Changing the quantitative value of the variables has no effect on their logical behavior in the math; the expressions stay the same. "a" defined as 10 behaves identically in logic to "a" defined as 5. Again, this is an elementary fact of mathematics, but it logically follows that any apparent difference in logical behavior between two different quantities through the same function is, in fact, not logical but instead notational. Flexible Ten Mathematics points out that the fact that any variable can be given any quantity value applies to the number line as well. We can define any number line we wish of arbitrary length with digits defined as any quantity of equal magnitude increase and mathematical logic will not change when applying that number line to calculations; quantifications will remain accurate so long as we stick to the defined number line when doing our calculations. Further, what ever point we designate as the repetition point on that number line will behave notationally as 10.
  
 	 
 For example, take two number systems: a system based on ten numerals and a system based on four.
@@ -70,13 +70,13 @@ Effectively, on a four digit number line dividing 1 by 10 (1/10) is quantitative
 
      Four digit system: one quarter = .1
 
-An immediate consequence of this notational difference is that ratios that are not expressible as perfect decimal values when using our standard ten digit number line are expressible as perfect values on a flexible ten number. For example, take a three digit system: 0,1,2:
+An immediate consequence of this notational difference is that ratios that are not expressible as perfect decimal values when using our standard ten digit number line are expressible as perfect values on a Flexible Ten number line. For example, take a three digit system: 0,1,2:
 
      Standard system: one third = 1/3 = 0.33333333333333333 – forever
 
      Three digit system: one third = 1/10 = .1 
 	 
-I have not done enough math to prove that there are other ratios that are not expressible in a standard ten system which would be in a flexible ten system, but I suspect there are many. I would argue that there is no logical nor quantitative reason to insist on using only a number line with a number of repeating units equal to the number of digits on a human hand; I would further argue that there may be some instances when there is a really good reason not to. For example, when trying to put an exact value on a logical ratio that is unexpressible due to notational artifacts caused by the arbitrary insistence that all number lines must be graduated into the standardly defined 10 units.   
+I have not done enough math to prove that there are other ratios that are not expressible in a standard ten system which would be in a flexible ten system, but I suspect there are many. I would argue that there is no logical nor quantitative reason to insist on using only a number line with a number of repeating units equal to the number of digits on a human hand; I would further argue that there may be some instances when there is a really good reason not to. For example, when trying to put an exact value on a logical ratio that is not expressible due to notational artifacts caused by the arbitrary insistence that all number lines must be graduated into the standardly defined 10 units. Insisting that all math be done using a number line with a number of repeating digits equal to the number of digits on two human hands may even be logically similar to insisting that the planets circle the earth. 
 
 It is easy to speculate how this thinking may make certain computations possible that would otherwise not be. A notation similar to the following might be useful in some instances:
 
