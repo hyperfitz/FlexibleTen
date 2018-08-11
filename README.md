@@ -31,7 +31,7 @@ For example, take two number systems: a system based on ten numerals and a syste
 
      System two: 0,1,2,3.
 
-In the first system the quantity normally defined as ten is depicted with the symbol 10 because that is where the number line begins repeating; in the second system the quantity commonly defined as four is depicted with the symbol 10 because, again, because that is where the number line starts repeating. 
+In the first system the quantity normally defined as ten is depicted with the symbol 10 because that is where the number line begins repeating; in the second system the quantity commonly defined as four is depicted with the symbol 10 because, again, that is where the number line starts repeating. 
 
 Now lets do some basic math starting with addition.
 
