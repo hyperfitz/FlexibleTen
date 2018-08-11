@@ -1,5 +1,5 @@
 # About this project
-See [About Page](./about.md)
+See [README](./README.md)
 
 # Install dependencies:
 First, install *nodejs* and *npm* if you haven't already.
