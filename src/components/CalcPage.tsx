@@ -21,7 +21,7 @@ export class CalcPage extends React.Component {
       <div className="row">
         <div className="col-lg-3 col-md-3"></div>
         <div className="col-lg-6 col-md-6">
-          <Calculator />
+          <Calculator></Calculator>
         </div>
         <div className="col-lg-3 col-md-3"></div>
       </div>

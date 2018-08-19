@@ -6,3 +6,4 @@ node_modules
 .settings/org.eclipse.wst.common.component
 .settings/.jsdtscope
 .project
+dist

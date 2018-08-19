@@ -82,7 +82,7 @@ const BinaryOperations: {[key: string]: BinaryOperation} = {
  * 
  * Accepts no props and maintains its own state.
  */
-export class Calculator extends React.Component<undefined, CalculatorState> {
+export class Calculator extends React.Component<{}, CalculatorState> {
 
   /**
    * Update the top display with a number and automatically
