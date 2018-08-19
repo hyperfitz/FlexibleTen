@@ -2,8 +2,11 @@
 
 # Flexible Ten Calculator and Flexible Ten Mathematics
 
-Also see about file:
-[About Page](./about.md)
+For setting up a local development environment, see:
+[Setup Page](./setup.md)
+
+More details about the architecture and design can be found here:
+[Architecture](./architecture.md)
 
 This document refers to number lines that can be found here:
 [FlexibleTenNumberLines](./FlexTenNumberLines.jpg)

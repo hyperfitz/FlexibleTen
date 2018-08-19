@@ -14,6 +14,9 @@ Install webpack:
 Install the dependencies of the project:
 `npm install`
 
+Launch local development server:
+`npm run dev`
+
 Development build:
 `npm run build`
 
